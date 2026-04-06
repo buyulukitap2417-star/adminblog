@@ -81,9 +81,9 @@
             <!-- Ayarlar Sekmesi -->
             <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
                 <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
-                <div class="p-6 bg-amber-50 border border-amber-100 rounded-2xl text-amber-800 text-sm">
-                    <i class="fa-solid fa-circle-info mr-2"></i>
-                    Gemini API anahtarı burada saklanır. Model: <strong>gemini-3.1-flash-lite-preview</strong>
+                <div class="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-sm">
+                    <i class="fa-solid fa-key mr-2"></i>
+                    Gemini API anahtarınızı buraya kaydedin. AI ile yazı üretmek için bu anahtar kullanılacaktır.
                 </div>
                 <div class="space-y-4">
                     <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
@@ -91,7 +91,6 @@
                         <input type="password" id="gemini-key" placeholder="API Key girin..." class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
                         <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium italic">Not: Bu ortamda API anahtarı çevre tarafından otomatik de yönetilebilir.</p>
                 </div>
             </div>
         </main>
@@ -102,14 +101,14 @@
         <div class="max-w-lg w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-3xl font-black text-slate-900">AI Yazar (3.1 Lite)</h2>
-                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button type="button" onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <p class="text-slate-500 text-sm font-medium">Hangi konuda bir blog yazısı üretmek istersin? Gemini 3.1 Flash Lite sizin için hazırlayacak.</p>
             <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Pisagor Teoremi Püf Noktaları" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
             
             <div id="ai-status-container" class="hidden py-2 text-center">
                 <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600 font-bold">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-8 w-8"></div>
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
                     İçerik Hazırlanıyor...
                 </div>
                 <div id="ai-error" class="hidden text-red-500 bg-red-50 p-4 rounded-2xl text-xs font-medium border border-red-100">
@@ -119,8 +118,8 @@
             </div>
 
             <div class="flex gap-4">
-                <button onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 transition">Vazgeç</button>
-                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition">Üret</button>
+                <button type="button" onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 transition">Vazgeç</button>
+                <button type="button" id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition">Üret</button>
             </div>
         </div>
     </div>
@@ -153,7 +152,9 @@
             try {
                 const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
                 if(data && data.value) document.getElementById('gemini-key').value = data.value;
-            } catch (e) {}
+            } catch (e) {
+                console.error("Ayarlar yüklenemedi:", e);
+            }
         }
 
         async function saveApiKey() {
@@ -180,19 +181,25 @@
                 document.getElementById('tab-'+id).classList.add('hidden');
             });
             document.getElementById('tab-'+t).classList.remove('hidden');
-            // Tab stilling
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('text-emerald-600', 'border-emerald-600'));
-            // Bu kısım UI iyileştirmesi için eklenebilir
         }
 
-        // --- GEMINI 3.1 FLASH LITE PREVIEW AI LOGIC ---
+        // --- GEMINI AI LOGIC (FIXED) ---
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
             if(!topic) return alert("Lütfen bir konu belirtin.");
 
-            // API Anahtarı çevre tarafından otomatik sağlanır, ancak veritabanından yedek olarak da çekilebilir
-            const apiKey = ""; 
-            const modelName = "gemini-3.1-flash-lite-preview";
+            // KRİTİK DÜZELTME: API Key veritabanından çekiliyor
+            const { data: keyData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+            const apiKey = keyData?.value || ""; 
+            
+            if(!apiKey) {
+                alert("Önce Ayarlar sekmesinden bir API Key kaydetmelisiniz!");
+                showTab('settings');
+                closeAIModal();
+                return;
+            }
+
+            const modelName = "gemini-1.5-flash"; // Kararlı sürüm önerilir, 3.1 lite desteği kontrol edilmeli
 
             const btn = document.getElementById('ai-gen-btn');
             const statusContainer = document.getElementById('ai-status-container');
@@ -205,7 +212,7 @@
             loading.classList.remove('hidden');
             errorDiv.classList.add('hidden');
 
-            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, emojilerle süslenmiş, öğretici ve merak uyandırıcı bir blog yazısı üret. Yanıtı kesinlikle şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
+            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, emojilerle süslenmiş, öğretici bir blog yazısı üret. Yanıtı kesinlikle şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
             const userQuery = `Konu: ${topic}`;
 
             let attempts = 0;
@@ -226,7 +233,6 @@
 
                         if (!response.ok) {
                             const errData = await response.json().catch(() => ({}));
-                            if (response.status === 404) throw new Error("Model (3.1 Lite) bulunamadı. Lütfen model ismini veya API erişiminizi kontrol edin.");
                             throw new Error(errData.error?.message || `Bağlantı Hatası: ${response.status}`);
                         }
 
@@ -239,7 +245,7 @@
                             document.getElementById('p-content').value = blog.content;
                             statusContainer.classList.add('hidden');
                             closeAIModal();
-                            alert("İçerik Gemini 3.1 Flash Lite ile başarıyla oluşturuldu!");
+                            alert("İçerik başarıyla oluşturuldu!");
                             return;
                         } else {
                             throw new Error("AI geçerli bir yanıt oluşturamadı.");
@@ -247,7 +253,7 @@
 
                     } catch (e) {
                         attempts++;
-                        if (attempts >= 5 || e.message.includes("404")) throw e;
+                        if (attempts >= 5) throw e;
                         await new Promise(r => setTimeout(r, delays[attempts-1]));
                     }
                 }
@@ -255,7 +261,7 @@
                 loading.classList.add('hidden');
                 errorDiv.classList.remove('hidden');
                 errorText.innerText = err.message;
-                console.error("AI Generation Error:", err);
+                console.error("AI Hatası:", err);
             } finally {
                 btn.disabled = false;
             }
