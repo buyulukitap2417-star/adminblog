@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MATOTA | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- Giriş Katmanı -->
+    <div id="login-overlay" class="hidden fixed inset-0 z-[2000] bg-slate-900/20 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h2 class="text-3xl font-black text-slate-900">Yönetici Paneli</h2>
+                <p class="text-slate-500 mt-2 text-sm">Veritabanı onaylı yönetici girişi.</p>
+            </div>
+            <form id="admin-login-form" class="space-y-4">
+                <input type="email" id="admin-email" placeholder="E-posta Adresi" required class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                <input type="password" id="admin-password" placeholder="Şifre" required class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200">Doğrula ve Gir</button>
+            </form>
+            <div class="mt-6 text-center">
+                <a href="index.html" class="text-xs text-slate-400 hover:text-emerald-600 font-bold transition uppercase tracking-widest">← Siteye Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin İçerik Paneli -->
+    <div id="admin-content" class="hidden">
+        <nav class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-[100] px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">MATOTA <span class="text-emerald-600 uppercase">Yönetim</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-end">
+                    <span id="admin-status" class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Yetkili Oturum</span>
+                </div>
+                <button onclick="logout()" class="ml-4 p-2 px-4 rounded-xl bg-red-50 text-red-500 font-bold hover:bg-red-500 hover:text-white transition">Çıkış</button>
+            </div>
+        </nav>
+
+        <div class="max-w-6xl mx-auto p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Blog Yazısı Paylaşma -->
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-feather-pointed mr-3 text-emerald-600"></i>Yeni İçerik Paylaş
+                </h2>
+                <form id="post-form" class="space-y-4">
+                    <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition font-bold">
+                    <textarea id="p-content" rows="12" placeholder="Blog içeriğini buraya yazın..." required class="w-full p-4 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition resize-none"></textarea>
+                    <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-100">Yayınla</button>
+                </form>
+            </div>
+
+            <!-- Kaynak Dosya Ekleme -->
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-3 text-emerald-600"></i>Dosya Kaynağı Ekle
+                </h2>
+                <form id="file-form" class="space-y-4">
+                    <input type="text" id="f-name" placeholder="Dosya Adı" required class="w-full p-4 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    <input type="url" id="f-url" placeholder="İndirme Bağlantısı" required class="w-full p-4 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    <select id="f-type" class="w-full p-4 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition bg-white font-bold">
+                        <option value="pdf">📄 PDF Belgesi</option>
+                        <option value="doc">📝 Çalışma Kağıdı</option>
+                        <option value="image">🖼️ Görsel Materyal</option>
+                    </select>
+                    <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold hover:bg-black transition shadow-md">Dosyayı Arşive Ekle</button>
+                </form>
+                
+                <div class="mt-8 p-6 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                    <p class="text-xs text-slate-500">Güvenlik Notu: Bu paneldeki her işlem veritabanı loglarına kaydedilmektedir.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Konfigürasyonu
+        const SB_URL = 'https://eygvzptaynyysagvgwyh.supabase.co'; 
+        const SB_KEY = 'sb_publishable_JixS3C4jQ2Znrgcr3-IZPg_1MfpvdXW';
+        
+        const supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
+        const loginOverlay = document.getElementById('login-overlay');
+        const adminContent = document.getElementById('admin-content');
+
+        // Dinamik Admin Yetki Kontrolü
+        async function checkAuthState() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (session) {
+                    // Veritabanındaki 'admins' tablosunda bu kullanıcı var mı?
+                    const { data: adminData, error } = await supabaseClient
+                        .from('admins')
+                        .select('uid')
+                        .eq('uid', session.user.id)
+                        .single();
+
+                    if (adminData && !error) {
+                        showAdmin();
+                    } else {
+                        // Eğer tabloda yoksa ama giriş yapmışsa, yetkisizdir
+                        await supabaseClient.auth.signOut();
+                        alert("Erişim Reddedildi: Yönetici listesinde bulunamadınız.");
+                        showLogin();
+                    }
+                } else {
+                    showLogin();
+                }
+            } catch (err) {
+                showLogin();
+            }
+        }
+
+        function showAdmin() {
+            loginOverlay.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+        }
+
+        function showLogin() {
+            loginOverlay.classList.remove('hidden');
+            adminContent.classList.add('hidden');
+        }
+
+        // Giriş İşlemi
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                checkAuthState(); // Girişten sonra yetkiyi veritabanından kontrol et
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        });
+
+        // Veri Gönderim İşlemleri (RLS kuralları veritabanında doğru ayarlanmalıdır)
+        document.getElementById('post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await supabaseClient.from('posts').insert([{ 
+                title: document.getElementById('p-title').value, 
+                content: document.getElementById('p-content').value 
+            }]);
+            if (error) alert(error.message); else { alert("Başarıyla yayınlandı!"); e.target.reset(); }
+        });
+
+        document.getElementById('file-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await supabaseClient.from('files').insert([{ 
+                name: document.getElementById('f-name').value, 
+                url: document.getElementById('f-url').value, 
+                file_type: document.getElementById('f-type').value 
+            }]);
+            if (error) alert(error.message); else { alert("Dosya eklendi!"); e.target.reset(); }
+        });
+
+        async function logout() { 
+            await supabaseClient.auth.signOut(); 
+            showLogin();
+        }
+
+        window.addEventListener('DOMContentLoaded', checkAuthState);
+    </script>
+</body>
+</html>
