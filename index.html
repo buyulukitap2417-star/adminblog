@@ -31,6 +31,7 @@
             <div class="flex gap-4">
                 <button onclick="showTab('publish')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">Yayınla</button>
                 <button onclick="showTab('manage')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">İçerik Yönetimi</button>
+                <button onclick="showTab('comments')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">Tüm Yorumlar</button>
                 <button onclick="showTab('settings')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">Ayarlar</button>
                 <button onclick="logout()" class="text-red-500 text-sm font-bold ml-4">Çıkış</button>
             </div>
@@ -48,30 +49,26 @@
                         <input type="hidden" id="edit-id">
                         <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
                         <textarea id="p-content" rows="15" placeholder="İçerik..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-                        <div class="flex gap-4">
-                            <button type="submit" id="submit-btn" class="flex-grow bg-emerald-600 text-white p-4 rounded-2xl font-bold">Yayınla</button>
-                            <button type="button" id="cancel-edit" class="hidden bg-slate-100 px-8 rounded-2xl font-bold" onclick="resetForm()">Vazgeç</button>
-                        </div>
+                        <button type="submit" id="submit-btn" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold">Yayınla</button>
                     </form>
                 </div>
             </div>
 
-            <!-- İçerik Yönetimi Sekmesi -->
+            <!-- İçerik Yönetimi -->
             <div id="tab-manage" class="hidden space-y-8">
                 <div class="bg-white p-10 rounded-3xl shadow-sm border">
                     <h2 class="text-2xl font-bold mb-8">Yayınlanan İçerikler</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="text-slate-400 text-sm uppercase tracking-widest">
-                                    <th class="pb-4">Başlık</th>
-                                    <th class="pb-4">Tarih</th>
-                                    <th class="pb-4">İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody id="manage-list" class="divide-y"></tbody>
-                        </table>
-                    </div>
+                    <table class="w-full">
+                        <tbody id="manage-list" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tüm Yorumlar Sekmesi -->
+            <div id="tab-comments" class="hidden space-y-8">
+                <div class="bg-white p-10 rounded-3xl shadow-sm border">
+                    <h2 class="text-2xl font-bold mb-8">Gelen Yorumlar</h2>
+                    <div id="all-comments-list" class="space-y-4"></div>
                 </div>
             </div>
 
@@ -84,15 +81,23 @@
         </main>
     </div>
 
+    <!-- Yorum Popup -->
+    <div id="comment-popup" class="hidden fixed inset-0 z-[3000] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="max-w-2xl w-full bg-white p-10 rounded-3xl shadow-2xl space-y-6">
+            <h3 id="popup-title" class="text-2xl font-bold text-slate-800">Yazı Yorumları</h3>
+            <div id="popup-comments-list" class="max-h-[60vh] overflow-y-auto space-y-4"></div>
+            <button onclick="closePopup()" class="w-full p-4 bg-slate-100 rounded-2xl font-bold">Kapat</button>
+        </div>
+    </div>
+
     <!-- AI Modal -->
     <div id="ai-modal" class="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6 hidden">
         <div class="max-w-lg w-full bg-white p-10 rounded-3xl shadow-2xl space-y-6">
             <h2 class="text-3xl font-black">AI Yazar</h2>
-            <input type="text" id="ai-topic" placeholder="Konu ne olsun?" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
-            <div id="ai-status" class="hidden text-emerald-600 font-bold text-center py-4"><div class="loader mx-auto mb-2 border-4 rounded-full h-8 w-8"></div>Yazıyorum...</div>
+            <input type="text" id="ai-topic" placeholder="Konu ne olsun?" class="w-full p-4 border rounded-2xl outline-none">
             <div class="flex gap-4">
-                <button onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl bg-slate-100 font-bold">Vazgeç</button>
-                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl bg-emerald-600 text-white font-bold">Üret</button>
+                <button onclick="closeAIModal()" class="flex-1 p-4 bg-slate-100 rounded-2xl font-bold">Vazgeç</button>
+                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 bg-emerald-600 text-white rounded-2xl font-bold">Üret</button>
             </div>
         </div>
     </div>
@@ -106,14 +111,14 @@
             const { data: { session } } = await sc.auth.getSession();
             if(session) {
                 const { data: admin } = await sc.from('admins').select('uid').eq('uid', session.user.id).single();
-                if(admin) { showAdmin(); loadSettings(); fetchManageList(); }
+                if(admin) { showAdmin(); loadSettings(); fetchManageList(); fetchAllComments(); }
                 else { await sc.auth.signOut(); showLogin(); }
             } else showLogin();
         }
 
-        function showAdmin() { document.getElementById('login-overlay').classList.add('hidden'); document.getElementById('admin-content').classList.remove('hidden'); showTab('publish'); }
+        function showAdmin() { document.getElementById('login-overlay').classList.add('hidden'); document.getElementById('admin-content').classList.remove('hidden'); }
         function showLogin() { document.getElementById('login-overlay').classList.remove('hidden'); }
-        function showTab(t) { ['publish','manage','settings'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); if(t === 'manage') fetchManageList(); }
+        function showTab(t) { ['publish','manage','settings','comments'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); }
 
         async function loadSettings() { const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single(); if(data) document.getElementById('gemini-key').value = data.value; }
         async function saveApiKey() { const val = document.getElementById('gemini-key').value; await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val }); alert("Kaydedildi."); }
@@ -121,40 +126,62 @@
         async function fetchManageList() {
             const { data } = await sc.from('posts').select('*').order('created_at', { ascending: false });
             document.getElementById('manage-list').innerHTML = data.map(p => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-6 font-bold text-slate-700">${p.title}</td>
-                    <td class="py-6 text-sm text-slate-400">${new Date(p.created_at).toLocaleDateString('tr-TR')}</td>
-                    <td class="py-6 space-x-2">
-                        <button onclick="editPost('${p.id}')" class="text-emerald-600 hover:bg-emerald-50 px-3 py-1 rounded-lg">Düzenle</button>
-                        <button onclick="deletePost('${p.id}')" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg">Sil</button>
+                <tr class="hover:bg-slate-50">
+                    <td class="py-4 font-bold text-slate-700">${p.title}</td>
+                    <td class="py-4 space-x-2 text-right">
+                        <button onclick="viewComments('${p.id}', '${p.title}')" class="text-blue-500 text-sm">Yorumlar (${p.comments_count || 0})</button>
+                        <button onclick="editPost('${p.id}')" class="text-emerald-600 text-sm">Düzenle</button>
+                        <button onclick="deletePost('${p.id}')" class="text-red-500 text-sm">Sil</button>
                     </td>
                 </tr>
             `).join('');
         }
+
+        async function viewComments(id, title) {
+            document.getElementById('popup-title').innerText = title + " - Yorumlar";
+            document.getElementById('comment-popup').classList.remove('hidden');
+            const { data } = await sc.from('comments').select('*').eq('post_id', id);
+            document.getElementById('popup-comments-list').innerHTML = data.map(c => `
+                <div class="p-4 bg-slate-50 rounded-xl flex justify-between">
+                    <span><b>${c.user_name}:</b> ${c.text}</span>
+                    <button onclick="deleteC('${c.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('') || "Yorum yok.";
+        }
+
+        async function fetchAllComments() {
+            const { data } = await sc.from('comments').select('*').order('created_at', { ascending: false });
+            document.getElementById('all-comments-list').innerHTML = data.map(c => `
+                <div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-teal-600">${c.user_name}</span>
+                        <p class="text-sm text-slate-700">${c.text}</p>
+                    </div>
+                    <button onclick="deleteC('${c.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteC(id) {
+            if(!confirm("Yorumu sil?")) return;
+            await sc.from('comments').delete().eq('id', id);
+            alert("Silindi."); closePopup(); fetchAllComments(); fetchManageList();
+        }
+
+        function closePopup() { document.getElementById('comment-popup').classList.add('hidden'); }
 
         async function editPost(id) {
             const { data } = await sc.from('posts').select('*').eq('id', id).single();
             document.getElementById('edit-id').value = data.id;
             document.getElementById('p-title').value = data.title;
             document.getElementById('p-content').value = data.content;
-            document.getElementById('form-title').innerText = "Yazıyı Güncelle";
-            document.getElementById('submit-btn').innerText = "Güncelle";
-            document.getElementById('cancel-edit').classList.remove('hidden');
             showTab('publish');
         }
 
         async function deletePost(id) {
-            if(!confirm("Bu yazıyı silmek istediğine emin misin?")) return;
+            if(!confirm("Silmek istediğine emin misin?")) return;
             await sc.from('posts').delete().eq('id', id);
             fetchManageList();
-        }
-
-        function resetForm() {
-            document.getElementById('edit-id').value = "";
-            document.getElementById('post-form').reset();
-            document.getElementById('form-title').innerText = "Yeni Blog Yazısı";
-            document.getElementById('submit-btn').innerText = "Yayınla";
-            document.getElementById('cancel-edit').classList.add('hidden');
         }
 
         document.getElementById('post-form').onsubmit = async (e) => {
@@ -162,36 +189,21 @@
             const id = document.getElementById('edit-id').value;
             const title = document.getElementById('p-title').value;
             const content = document.getElementById('p-content').value;
-
-            if(id) {
-                await sc.from('posts').update({ title, content }).eq('id', id);
-                alert("Güncellendi!");
-            } else {
-                await sc.from('posts').insert([{ title, content }]);
-                alert("Yayınlandı!");
-                // Burada tüm abonelere mail gönderimi için bir tetikleyici (Edge Function) çağrılabilir.
-            }
-            resetForm();
-            showTab('manage');
+            if(id) await sc.from('posts').update({ title, content }).eq('id', id);
+            else await sc.from('posts').insert([{ title, content }]);
+            alert("Başarılı!"); fetchManageList(); showTab('manage');
         }
 
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value;
             const apiKey = document.getElementById('gemini-key').value;
-            if(!topic || !apiKey) return alert("Konu ve Key eksik.");
-            
-            document.getElementById('ai-status').classList.remove('hidden');
-            document.getElementById('ai-gen-btn').classList.add('hidden');
-
-            const systemPrompt = "Sen samimi, hayat dolu bir ortaokul matematik öğretmenisin. Asla yapay zeka olduğunu belli etme. Markdown (#, **, ##) sembollerini KESİNLİKLE KULLANMA. Daha akıcı, gerçekçi ve samimi paragraflar kur. Çıktıyı JSON olarak ver: {'title': '...', 'content': '...'}";
-            
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: `Konu: ${topic}` }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        systemInstruction: { parts: [{ text: "Samimi bir öğretmen gibi yaz. JSON ver: {title, content}" }] },
                         generationConfig: { responseMimeType: "application/json" }
                     })
                 });
@@ -200,13 +212,11 @@
                 document.getElementById('p-title').value = blog.title;
                 document.getElementById('p-content').value = blog.content;
                 closeAIModal();
-            } catch (err) { alert("Hata!"); }
-            finally { document.getElementById('ai-status').classList.add('hidden'); document.getElementById('ai-gen-btn').classList.remove('hidden'); }
+            } catch (err) { alert("AI Hatası!"); }
         }
 
         window.openAIModal = () => document.getElementById('ai-modal').classList.remove('hidden');
         window.closeAIModal = () => document.getElementById('ai-modal').classList.add('hidden');
-
         document.getElementById('admin-login-form').onsubmit = async (e) => {
             e.preventDefault();
             await sc.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-password').value });
