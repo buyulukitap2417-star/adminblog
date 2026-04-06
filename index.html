@@ -83,14 +83,15 @@
                 <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
                 <div class="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-sm">
                     <i class="fa-solid fa-circle-info mr-2"></i>
-                    Bu ortamda Gemini API anahtarı ve model yapılandırması sistem tarafından otomatik olarak yönetilmektedir.
+                    AI ile yazı üretmek için kendi Gemini API anahtarınızı buraya girin ve kaydedin.
                 </div>
-                <div class="space-y-4 opacity-50 cursor-not-allowed">
+                <div class="space-y-4">
                     <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
                     <div class="flex gap-2">
-                        <input type="password" value="OTOMATIK_YONETILIYOR" readonly class="flex-grow p-4 rounded-2xl border outline-none bg-slate-50">
+                        <input type="password" id="gemini-key" placeholder="API Key'inizi buraya yapıştırın" class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Uyumlu Model: gemini-3.1-flash-lite-preview</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Kullanılan Model: gemini-3.1-flash-lite-preview</p>
                 </div>
             </div>
         </main>
@@ -138,6 +139,7 @@
                 if(admin) {
                     user = session.user;
                     showAdmin();
+                    loadSettings();
                 } else {
                     await sc.auth.signOut();
                     showLogin();
@@ -145,6 +147,23 @@
             } else {
                 showLogin();
             }
+        }
+
+        async function loadSettings() {
+            try {
+                const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+                if(data && data.value) document.getElementById('gemini-key').value = data.value;
+            } catch (e) {
+                console.error("Ayarlar yüklenemedi:", e);
+            }
+        }
+
+        async function saveApiKey() {
+            const val = document.getElementById('gemini-key').value.trim();
+            if(!val) return alert("API anahtarı boş olamaz.");
+            const { error } = await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val, updated_at: new Date() });
+            if(!error) alert("API Key başarıyla kaydedildi!");
+            else alert("Hata: " + error.message);
         }
 
         function showAdmin() {
@@ -165,16 +184,23 @@
             document.getElementById('tab-'+t).classList.remove('hidden');
         }
 
-        // --- GEMINI AI LOGIC (OPTIMIZED FOR PREVIEW) ---
+        // --- GEMINI AI LOGIC (MANUAL API KEY) ---
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
             if(!topic) return alert("Lütfen bir konu belirtin.");
 
-            // KRITIK: Bu ortamda sadece bu isim desteklenmektedir
-            const modelName = "gemini-3.1-flash-lite-preview";
-            // KRITIK: API Key sistem tarafından otomatik enjekte edilir
-            const apiKey = ""; 
+            // API anahtarını veritabanından çek
+            const { data: keyData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+            const apiKey = keyData?.value;
 
+            if(!apiKey) {
+                alert("Önce Ayarlar sekmesinden Gemini API Key girmeli ve kaydetmelisiniz!");
+                showTab('settings');
+                closeAIModal();
+                return;
+            }
+
+            const modelName = "gemini-3.1-flash-lite-preview";
             const btn = document.getElementById('ai-gen-btn');
             const statusContainer = document.getElementById('ai-status-container');
             const loading = document.getElementById('ai-loading');
@@ -208,8 +234,7 @@
 
                         if (!response.ok) {
                             const errData = await response.json().catch(() => ({}));
-                            // 404 ise modeli bulamadı demektir, daha fazla deneme yapma
-                            if (response.status === 404) throw new Error(`Model (${modelName}) bulunamadı. Lütfen sistem model ismini kontrol edin.`);
+                            if (response.status === 404) throw new Error(`Model (${modelName}) veya API Key hatası. Lütfen kontrol edin.`);
                             throw new Error(errData.error?.message || `Bağlantı Hatası: ${response.status}`);
                         }
 
