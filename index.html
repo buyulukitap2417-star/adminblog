@@ -42,11 +42,8 @@
         </nav>
 
         <main class="max-w-6xl mx-auto p-8">
-            
-            <!-- Yayınlama Sekmesi -->
             <div id="tab-publish" class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Blog Yazma -->
                     <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                         <div class="flex justify-between items-center">
                             <h2 class="text-2xl font-bold text-slate-800">Blog Yazısı</h2>
@@ -61,7 +58,6 @@
                         </form>
                     </div>
 
-                    <!-- Dosya Ekleme -->
                     <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">Kaynak Ekle</h2>
                         <form id="file-form" class="space-y-4">
@@ -78,39 +74,32 @@
                 </div>
             </div>
 
-            <!-- Ayarlar Sekmesi -->
             <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
                 <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
-                <div class="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-sm">
-                    <i class="fa-solid fa-circle-info mr-2"></i>
-                    AI ile yazı üretmek için kendi Gemini API anahtarınızı buraya girin ve kaydedin.
-                </div>
                 <div class="space-y-4">
                     <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
                     <div class="flex gap-2">
                         <input type="password" id="gemini-key" placeholder="API Key'inizi buraya yapıştırın" class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
                         <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Kullanılan Model: gemini-3.1-flash-lite-preview</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- AI Modal -->
     <div id="ai-modal" class="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6 hidden">
         <div class="max-w-lg w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6">
             <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black text-slate-900">AI Yazar</h2>
+                <h2 class="text-3xl font-black text-slate-900">Doğal AI Yazar</h2>
                 <button type="button" onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <p class="text-slate-500 text-sm font-medium">Matematiksel bir konu girin, sistem sizin için en uygun içeriği hazırlayacaktır.</p>
-            <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Pisagor Teoremi İpuçları" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
+            <p class="text-slate-500 text-sm font-medium">Hangi konuda bir yazı hazırlamamı istersin? Gerçek bir öğretmen samimiyetiyle yazacağım.</p>
+            <input type="text" id="ai-topic" placeholder="Örn: Rasyonel Sayıları Sevdirecek Bir Yazı" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
             
             <div id="ai-status-container" class="hidden py-2 text-center">
                 <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600 font-bold">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-8 w-8"></div>
-                    İçerik Hazırlanıyor...
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+                    Kalemi kağıdı hazırlıyorum...
                 </div>
                 <div id="ai-error" class="hidden text-red-500 bg-red-50 p-4 rounded-2xl text-xs font-medium border border-red-100">
                     <i class="fa-solid fa-triangle-exclamation mr-2"></i>
@@ -120,7 +109,7 @@
 
             <div class="flex gap-4">
                 <button type="button" onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 transition">Vazgeç</button>
-                <button type="button" id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition">Üret</button>
+                <button type="button" id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition">Yazıyı Hazırla</button>
             </div>
         </div>
     </div>
@@ -184,12 +173,10 @@
             document.getElementById('tab-'+t).classList.remove('hidden');
         }
 
-        // --- GEMINI AI LOGIC (MANUAL API KEY) ---
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
             if(!topic) return alert("Lütfen bir konu belirtin.");
 
-            // API anahtarını veritabanından çek
             const { data: keyData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
             const apiKey = keyData?.value;
 
@@ -212,12 +199,23 @@
             loading.classList.remove('hidden');
             errorDiv.classList.add('hidden');
 
-            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, emojilerle süslenmiş, öğretici bir blog yazısı üret. Yanıtı kesinlikle şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
-            const userQuery = `Konu: ${topic}`;
+            // --- YENİ PROMPT STRATEJİSİ ---
+            const systemPrompt = `Sen samimi, hayat dolu ve öğrencilerini çok seven bir ortaokul matematik öğretmenisin. 
+            Yazılarını bir robot gibi değil, sanki karşında öğrencilerin varmış gibi samimi bir dille yazıyorsun.
+            
+            KURALLAR:
+            1. Asla yapay zeka olduğunu belli etme.
+            2. "Merhaba ben bir yapay zekayım" gibi cümleler kurma.
+            3. Robotik listelerden (1. Madde, 2. Madde) kaçın, daha akıcı paragraflar kullan.
+            4. Her cümlenin sonuna emoji koyma. Sadece duygu katmak için arada bir kullan.
+            5. Markdown (**, #, ##) gibi sembolleri KESİNLİKLE kullanma. Temiz metin yaz.
+            6. Başlık ilgi çekici olsun.
+            7. Çıktıyı şu JSON formatında ver: {"title": "Başlık Buraya", "content": "Metin Buraya"}`;
+
+            const userQuery = `Öğretmenim, bugün şu konuda bir yazı yazar mısınız: ${topic}`;
 
             let attempts = 0;
-            const maxAttempts = 5;
-            const delays = [1000, 2000, 4000, 8000, 16000];
+            const maxAttempts = 3;
 
             try {
                 while (attempts < maxAttempts) {
@@ -232,11 +230,7 @@
                             })
                         });
 
-                        if (!response.ok) {
-                            const errData = await response.json().catch(() => ({}));
-                            if (response.status === 404) throw new Error(`Model (${modelName}) veya API Key hatası. Lütfen kontrol edin.`);
-                            throw new Error(errData.error?.message || `Bağlantı Hatası: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error("Bağlantı Hatası");
 
                         const data = await response.json();
                         const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -247,23 +241,18 @@
                             document.getElementById('p-content').value = blog.content;
                             statusContainer.classList.add('hidden');
                             closeAIModal();
-                            alert("İçerik başarıyla oluşturuldu!");
                             return;
-                        } else {
-                            throw new Error("AI geçerli bir yanıt oluşturamadı.");
                         }
-
                     } catch (e) {
                         attempts++;
-                        if (attempts >= maxAttempts || e.message.includes("404")) throw e;
-                        await new Promise(r => setTimeout(r, delays[attempts-1]));
+                        await new Promise(r => setTimeout(r, 2000));
                     }
                 }
+                throw new Error("Yanıt alınamadı.");
             } catch (err) {
                 loading.classList.add('hidden');
                 errorDiv.classList.remove('hidden');
                 errorText.innerText = err.message;
-                console.error("AI Hatası:", err);
             } finally {
                 btn.disabled = false;
             }
@@ -307,7 +296,6 @@
         }
 
         async function logout() { await sc.auth.signOut(); location.reload(); }
-
         init();
     </script>
 </body>
