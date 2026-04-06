@@ -45,12 +45,14 @@
                     <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border space-y-6">
                         <div class="flex justify-between items-center">
                             <h2 class="text-2xl font-bold">Blog Yazısı</h2>
-                            <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI ile Üret</button>
+                            <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100 transition hover:bg-emerald-100">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI ile Üret
+                            </button>
                         </div>
                         <form id="post-form" class="space-y-4">
                             <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
                             <textarea id="p-content" rows="12" placeholder="İçeriği buraya yazın..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
-                            <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold">Yayınla</button>
+                            <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold hover:bg-emerald-700 transition">Yayınla</button>
                         </form>
                     </div>
 
@@ -65,7 +67,7 @@
                                 <option value="doc">Word / Excel</option>
                                 <option value="image">Görsel</option>
                             </select>
-                            <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold">Ekle</button>
+                            <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold hover:bg-black transition">Ekle</button>
                         </form>
                     </div>
                 </div>
@@ -73,14 +75,16 @@
 
             <!-- Ayarlar Sekmesi -->
             <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border space-y-8">
-                <h2 class="text-3xl font-black">Genel Ayarlar</h2>
-                <div class="space-y-4">
-                    <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
+                <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
+                <div class="p-6 bg-amber-50 border border-amber-100 rounded-2xl text-amber-800 text-sm">
+                    <i class="fa-solid fa-circle-info mr-2"></i>
+                    Bu ortamda Gemini API anahtarı sistem tarafından otomatik olarak yönetilmektedir. Manuel anahtar girmenize gerek yoktur.
+                </div>
+                <div class="space-y-4 opacity-50 pointer-events-none">
+                    <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key (Otomatik)</label>
                     <div class="flex gap-2">
-                        <input type="password" id="gemini-key" placeholder="API Key girin..." class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500">
-                        <button onclick="saveApiKey()" class="bg-slate-900 text-white px-6 rounded-2xl font-bold">Kaydet</button>
+                        <input type="password" value="SYSTEM_MANAGED" readonly class="flex-grow p-4 rounded-2xl border bg-slate-50 outline-none">
                     </div>
-                    <p class="text-[10px] text-slate-400">Bu anahtar, AI ile içerik üretmek için güvenli bir şekilde saklanır.</p>
                 </div>
             </div>
         </main>
@@ -89,16 +93,28 @@
     <!-- AI Modal -->
     <div id="ai-modal" class="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6 hidden">
         <div class="max-w-lg w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6">
-            <h2 class="text-3xl font-black">AI Yazar</h2>
-            <p class="text-slate-500">Hangi konuda bir blog yazısı üretmek istersin?</p>
-            <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Üslü Sayılar İpuçları" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
-            <div id="ai-loading" class="hidden flex items-center justify-center gap-3 text-emerald-600 font-bold">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
-                Yazılıyor...
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-black">AI Yazar</h2>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
+            <p class="text-slate-500">Hangi matematiksel konuda bir blog yazısı üretmek istersin?</p>
+            <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Üslü Sayılar Pratik Bilgiler" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+            
+            <!-- Durum ve Hata Mesajları -->
+            <div id="ai-status-container" class="hidden py-4 rounded-2xl text-center font-bold">
+                <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+                    Yazı Hazırlanıyor...
+                </div>
+                <div id="ai-error" class="hidden text-red-500 bg-red-50 p-4 rounded-2xl text-sm font-medium">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                    <span id="ai-error-text">Bir hata oluştu.</span>
+                </div>
+            </div>
+
             <div class="flex gap-4">
-                <button onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100">Vazgeç</button>
-                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white">Üret</button>
+                <button onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 transition">Vazgeç</button>
+                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-lg shadow-emerald-100">Üret</button>
             </div>
         </div>
     </div>
@@ -113,12 +129,10 @@
         async function init() {
             const { data: { session } } = await sc.auth.getSession();
             if(session) {
-                // Check if truly admin
                 const { data: admin } = await sc.from('admins').select('uid').eq('uid', session.user.id).single();
                 if(admin) {
                     user = session.user;
                     showAdmin();
-                    loadSettings();
                 } else {
                     await sc.auth.signOut();
                     document.getElementById('login-overlay').classList.remove('hidden');
@@ -141,35 +155,33 @@
             document.getElementById('tab-'+t).classList.remove('hidden');
         }
 
-        async function loadSettings() {
-            const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
-            if(data) document.getElementById('gemini-key').value = data.value;
-        }
-
-        async function saveApiKey() {
-            const val = document.getElementById('gemini-key').value.trim();
-            const { error } = await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val, updated_at: new Date() });
-            if(!error) alert("API Key kaydedildi!");
-        }
-
-        // Gemini AI Logic
+        // Gemini AI Mantığı
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
-            const apiKey = document.getElementById('gemini-key').value.trim();
-            if(!topic || !apiKey) return alert("Lütfen konu ve API Key girin.");
+            if(!topic) return alert("Lütfen bir konu girin.");
+
+            // Kural gereği apiKey boş bırakılır, çevre tarafından doldurulur
+            const apiKey = ""; 
 
             const btn = document.getElementById('ai-gen-btn');
-            const loader = document.getElementById('ai-loading');
-            btn.classList.add('hidden');
-            loader.classList.remove('hidden');
+            const statusContainer = document.getElementById('ai-status-container');
+            const loading = document.getElementById('ai-loading');
+            const errorDiv = document.getElementById('ai-error');
+            const errorText = document.getElementById('ai-error-text');
 
-            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, eğlenceli ve öğretici bir blog yazısı üret. Yazı başlığı ve içeriği JSON formatında olsun. Örn: {title: '...', content: '...'}";
-            const userQuery = `Konu: ${topic}`;
+            btn.disabled = true;
+            statusContainer.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+
+            const systemPrompt = "Sen profesyonel bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin hem eğlenip hem öğreneceği, akıcı, modern ve emoji destekli bir blog yazısı üret. Çıktıyı mutlaka şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
+            const userQuery = `Şu konuda bir blog yazısı yaz: ${topic}`;
+
+            let resultText = "";
+            let attempts = 0;
+            const delays = [1000, 2000, 4000, 8000, 16000];
 
             try {
-                // Exponential Backoff Retry Logic
-                let resultText = "";
-                let attempts = 0;
                 while (attempts < 5) {
                     try {
                         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -181,50 +193,89 @@
                                 generationConfig: { responseMimeType: "application/json" }
                             })
                         });
+
+                        if (response.status === 404) {
+                            throw new Error("API uç noktası bulunamadı (404). Lütfen sistem ayarlarını kontrol edin.");
+                        }
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.error?.message || `Sunucu hatası: ${response.status}`);
+                        }
+
                         const data = await response.json();
                         resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
                         if (resultText) break;
+                        else throw new Error("AI geçerli bir yanıt oluşturamadı.");
+
                     } catch (e) {
                         attempts++;
-                        await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
+                        // Yapısal hatalarda (404 gibi) tekrar denemeyi kes
+                        if (e.message.includes("404") || attempts >= 5) {
+                            throw e;
+                        }
+                        // Exponential Backoff
+                        await new Promise(r => setTimeout(r, delays[attempts-1]));
                     }
                 }
-
-                if(!resultText) throw new Error("AI yanıt vermedi.");
 
                 const blog = JSON.parse(resultText);
                 document.getElementById('p-title').value = blog.title;
                 document.getElementById('p-content').value = blog.content;
+                
+                // Başarılıysa temizle ve kapat
+                statusContainer.classList.add('hidden');
                 closeAIModal();
+                alert("Yazı hazır! İçeriği kontrol edip yayınlayabilirsiniz.");
+
             } catch (err) {
-                alert("Hata: " + err.message);
+                loading.classList.add('hidden');
+                errorDiv.classList.remove('hidden');
+                errorText.innerText = err.message;
+                console.error("AI Generation Error:", err);
             } finally {
-                btn.classList.remove('hidden');
-                loader.classList.add('hidden');
+                btn.disabled = false;
             }
         }
 
-        // Modal Helpers
-        window.openAIModal = () => document.getElementById('ai-modal').classList.remove('hidden');
+        window.openAIModal = () => {
+            document.getElementById('ai-topic').value = "";
+            document.getElementById('ai-status-container').classList.add('hidden');
+            document.getElementById('ai-modal').classList.remove('hidden');
+        };
         window.closeAIModal = () => document.getElementById('ai-modal').classList.add('hidden');
 
-        // Form Handlers
+        // Form İşlemleri
         document.getElementById('post-form').onsubmit = async (e) => {
             e.preventDefault();
-            const { error } = await sc.from('posts').insert([{ title: document.getElementById('p-title').value, content: document.getElementById('p-content').value }]);
-            if(error) alert(error.message); else { alert("Yayınlandı!"); e.target.reset(); }
+            const { error } = await sc.from('posts').insert([{ 
+                title: document.getElementById('p-title').value, 
+                content: document.getElementById('p-content').value 
+            }]);
+            if(error) alert("Hata: " + error.message); 
+            else { alert("Blog yazısı başarıyla yayınlandı!"); e.target.reset(); }
         }
 
         document.getElementById('file-form').onsubmit = async (e) => {
             e.preventDefault();
-            const { error } = await sc.from('files').insert([{ name: document.getElementById('f-name').value, url: document.getElementById('f-url').value, file_type: document.getElementById('f-type').value }]);
-            if(error) alert(error.message); else { alert("Eklendi!"); e.target.reset(); }
+            const { error } = await sc.from('files').insert([{ 
+                name: document.getElementById('f-name').value, 
+                url: document.getElementById('f-url').value, 
+                file_type: document.getElementById('f-type').value 
+            }]);
+            if(error) alert("Hata: " + error.message); 
+            else { alert("Dosya kaynağı başarıyla eklendi!"); e.target.reset(); }
         }
 
         document.getElementById('admin-login-form').onsubmit = async (e) => {
             e.preventDefault();
-            const { error } = await sc.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-password').value });
-            if(error) alert(error.message); else location.reload();
+            const { error } = await sc.auth.signInWithPassword({ 
+                email: document.getElementById('a-email').value, 
+                password: document.getElementById('a-password').value 
+            });
+            if(error) alert("Giriş hatası: " + error.message); 
+            else location.reload();
         }
 
         async function logout() { await sc.auth.signOut(); location.reload(); }
