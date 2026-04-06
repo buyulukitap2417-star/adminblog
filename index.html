@@ -21,8 +21,8 @@
         <div class="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl">
             <h2 class="text-3xl font-black mb-6 text-center text-slate-900">Admin Girişi</h2>
             <form id="admin-login-form" class="space-y-4">
-                <input type="email" id="a-email" placeholder="E-posta" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500">
-                <input type="password" id="a-password" placeholder="Şifre" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500">
+                <input type="email" id="a-email" placeholder="E-posta" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                <input type="password" id="a-password" placeholder="Şifre" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
                 <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition">Giriş Yap</button>
             </form>
         </div>
@@ -31,13 +31,13 @@
     <div id="admin-content" class="hidden">
         <nav class="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-[100]">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold">M</div>
+                <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm shadow-emerald-200">M</div>
                 <h1 class="text-xl font-black text-emerald-600 tracking-tighter uppercase">MATOTA Admin</h1>
             </div>
             <div class="flex gap-4">
-                <button onclick="showTab('publish')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2">Yayınla</button>
-                <button onclick="showTab('settings')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2">Ayarlar</button>
-                <button onclick="logout()" class="text-red-500 text-sm font-bold">Çıkış</button>
+                <button onclick="showTab('publish')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2 transition hover:text-emerald-600">Yayınla</button>
+                <button onclick="showTab('settings')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2 transition hover:text-emerald-600">Ayarlar</button>
+                <button onclick="logout()" class="text-red-500 text-sm font-bold hover:text-red-700 transition">Çıkış</button>
             </div>
         </nav>
 
@@ -47,30 +47,30 @@
             <div id="tab-publish" class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Blog Yazma -->
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                         <div class="flex justify-between items-center">
                             <h2 class="text-2xl font-bold text-slate-800">Blog Yazısı</h2>
                             <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100 transition hover:bg-emerald-100">
-                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI ile Üret
+                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI (3.1 Lite) ile Üret
                             </button>
                         </div>
                         <form id="post-form" class="space-y-4">
-                            <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
-                            <textarea id="p-content" rows="12" placeholder="İçeriği buraya yazın..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
-                            <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold hover:bg-emerald-700 transition">Yayınla</button>
+                            <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
+                            <textarea id="p-content" rows="12" placeholder="İçeriği buraya yazın..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition"></textarea>
+                            <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100">Yayınla</button>
                         </form>
                     </div>
 
                     <!-- Dosya Ekleme -->
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">Kaynak Ekle</h2>
                         <form id="file-form" class="space-y-4">
                             <input type="text" id="f-name" placeholder="Dosya Adı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
                             <input type="url" id="f-url" placeholder="İndirme Linki" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
                             <select id="f-type" class="w-full p-4 border rounded-2xl bg-white font-bold outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                                <option value="pdf">PDF</option>
-                                <option value="doc">Word / Excel</option>
-                                <option value="image">Görsel</option>
+                                <option value="pdf">📄 PDF Belgesi</option>
+                                <option value="doc">📝 Word / Excel</option>
+                                <option value="image">🖼️ Görsel / Materyal</option>
                             </select>
                             <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold hover:bg-black transition">Sisteme Ekle</button>
                         </form>
@@ -79,18 +79,19 @@
             </div>
 
             <!-- Ayarlar Sekmesi -->
-            <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border space-y-8">
+            <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
                 <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
                 <div class="p-6 bg-amber-50 border border-amber-100 rounded-2xl text-amber-800 text-sm">
                     <i class="fa-solid fa-circle-info mr-2"></i>
-                    Bu ortamda Gemini API anahtarı otomatik olarak yönetilir. Manuel giriş yapmanıza gerek yoktur.
+                    Gemini API anahtarı burada saklanır. Model: <strong>gemini-3.1-flash-lite-preview</strong>
                 </div>
                 <div class="space-y-4">
                     <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
-                    <div class="flex gap-2 opacity-50 pointer-events-none">
-                        <input type="password" id="gemini-key" value="SYSTEM_MANAGED" readonly class="flex-grow p-4 rounded-2xl border outline-none bg-slate-50">
+                    <div class="flex gap-2">
+                        <input type="password" id="gemini-key" placeholder="API Key girin..." class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium">Model: gemini-1.5-flash (Önerilen)</p>
+                    <p class="text-[10px] text-slate-400 font-medium italic">Not: Bu ortamda API anahtarı çevre tarafından otomatik de yönetilebilir.</p>
                 </div>
             </div>
         </main>
@@ -100,16 +101,16 @@
     <div id="ai-modal" class="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6 hidden">
         <div class="max-w-lg w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6">
             <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black text-slate-900">AI Yazar</h2>
+                <h2 class="text-3xl font-black text-slate-900">AI Yazar (3.1 Lite)</h2>
                 <button onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <p class="text-slate-500 text-sm font-medium">Matematiksel bir konu girin, yapay zeka sizin için profesyonel bir blog yazısı hazırlasın.</p>
+            <p class="text-slate-500 text-sm font-medium">Hangi konuda bir blog yazısı üretmek istersin? Gemini 3.1 Flash Lite sizin için hazırlayacak.</p>
             <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Pisagor Teoremi Püf Noktaları" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
             
             <div id="ai-status-container" class="hidden py-2 text-center">
                 <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600 font-bold">
                     <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-100 h-8 w-8"></div>
-                    İçerik Oluşturuluyor...
+                    İçerik Hazırlanıyor...
                 </div>
                 <div id="ai-error" class="hidden text-red-500 bg-red-50 p-4 rounded-2xl text-xs font-medium border border-red-100">
                     <i class="fa-solid fa-triangle-exclamation mr-2"></i>
@@ -138,6 +139,7 @@
                 if(admin) {
                     user = session.user;
                     showAdmin();
+                    loadSettings();
                 } else {
                     await sc.auth.signOut();
                     showLogin();
@@ -145,6 +147,21 @@
             } else {
                 showLogin();
             }
+        }
+
+        async function loadSettings() {
+            try {
+                const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+                if(data && data.value) document.getElementById('gemini-key').value = data.value;
+            } catch (e) {}
+        }
+
+        async function saveApiKey() {
+            const val = document.getElementById('gemini-key').value.trim();
+            if(!val) return alert("API anahtarı boş olamaz.");
+            const { error } = await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val, updated_at: new Date() });
+            if(!error) alert("API Key başarıyla kaydedildi!");
+            else alert("Hata: " + error.message);
         }
 
         function showAdmin() {
@@ -163,16 +180,19 @@
                 document.getElementById('tab-'+id).classList.add('hidden');
             });
             document.getElementById('tab-'+t).classList.remove('hidden');
+            // Tab stilling
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('text-emerald-600', 'border-emerald-600'));
+            // Bu kısım UI iyileştirmesi için eklenebilir
         }
 
-        // --- GEMINI 1.5 FLASH AI LOGIC ---
+        // --- GEMINI 3.1 FLASH LITE PREVIEW AI LOGIC ---
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
             if(!topic) return alert("Lütfen bir konu belirtin.");
 
-            // API Anahtarı çevre tarafından otomatik sağlanır
+            // API Anahtarı çevre tarafından otomatik sağlanır, ancak veritabanından yedek olarak da çekilebilir
             const apiKey = ""; 
-            const modelName = "gemini-1.5-flash";
+            const modelName = "gemini-3.1-flash-lite-preview";
 
             const btn = document.getElementById('ai-gen-btn');
             const statusContainer = document.getElementById('ai-status-container');
@@ -185,7 +205,7 @@
             loading.classList.remove('hidden');
             errorDiv.classList.add('hidden');
 
-            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, emojilerle süslenmiş, öğretici bir blog yazısı üret. Yanıtı mutlaka şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
+            const systemPrompt = "Sen bir ortaokul matematik öğretmenisin. Verilen konuda, öğrencilerin anlayacağı dilde, emojilerle süslenmiş, öğretici ve merak uyandırıcı bir blog yazısı üret. Yanıtı kesinlikle şu JSON formatında ver: {\"title\": \"...\", \"content\": \"...\"}";
             const userQuery = `Konu: ${topic}`;
 
             let attempts = 0;
@@ -206,7 +226,8 @@
 
                         if (!response.ok) {
                             const errData = await response.json().catch(() => ({}));
-                            throw new Error(errData.error?.message || `Hata: ${response.status}`);
+                            if (response.status === 404) throw new Error("Model (3.1 Lite) bulunamadı. Lütfen model ismini veya API erişiminizi kontrol edin.");
+                            throw new Error(errData.error?.message || `Bağlantı Hatası: ${response.status}`);
                         }
 
                         const data = await response.json();
@@ -218,7 +239,7 @@
                             document.getElementById('p-content').value = blog.content;
                             statusContainer.classList.add('hidden');
                             closeAIModal();
-                            alert("İçerik başarıyla oluşturuldu!");
+                            alert("İçerik Gemini 3.1 Flash Lite ile başarıyla oluşturuldu!");
                             return;
                         } else {
                             throw new Error("AI geçerli bir yanıt oluşturamadı.");
@@ -226,7 +247,7 @@
 
                     } catch (e) {
                         attempts++;
-                        if (attempts >= 5) throw e;
+                        if (attempts >= 5 || e.message.includes("404")) throw e;
                         await new Promise(r => setTimeout(r, delays[attempts-1]));
                     }
                 }
@@ -234,6 +255,7 @@
                 loading.classList.add('hidden');
                 errorDiv.classList.remove('hidden');
                 errorText.innerText = err.message;
+                console.error("AI Generation Error:", err);
             } finally {
                 btn.disabled = false;
             }
@@ -248,28 +270,31 @@
 
         document.getElementById('post-form').onsubmit = async (e) => {
             e.preventDefault();
-            const title = document.getElementById('p-title').value;
-            const content = document.getElementById('p-content').value;
-            const { error } = await sc.from('posts').insert([{ title, content }]);
+            const { error } = await sc.from('posts').insert([{ 
+                title: document.getElementById('p-title').value, 
+                content: document.getElementById('p-content').value 
+            }]);
             if(error) alert("Hata: " + error.message); 
             else { alert("Yazı başarıyla yayınlandı!"); e.target.reset(); }
         }
 
         document.getElementById('file-form').onsubmit = async (e) => {
             e.preventDefault();
-            const name = document.getElementById('f-name').value;
-            const url = document.getElementById('f-url').value;
-            const type = document.getElementById('f-type').value;
-            const { error } = await sc.from('files').insert([{ name, url, file_type: type }]);
+            const { error } = await sc.from('files').insert([{ 
+                name: document.getElementById('f-name').value, 
+                url: document.getElementById('f-url').value, 
+                file_type: document.getElementById('f-type').value 
+            }]);
             if(error) alert("Hata: " + error.message); 
             else { alert("Dosya başarıyla eklendi!"); e.target.reset(); }
         }
 
         document.getElementById('admin-login-form').onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('a-email').value;
-            const password = document.getElementById('a-password').value;
-            const { error } = await sc.auth.signInWithPassword({ email, password });
+            const { error } = await sc.auth.signInWithPassword({ 
+                email: document.getElementById('a-email').value, 
+                password: document.getElementById('a-password').value 
+            });
             if(error) alert("Giriş başarısız."); else location.reload();
         }
 
