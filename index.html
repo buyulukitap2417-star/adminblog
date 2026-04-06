@@ -15,6 +15,7 @@
 </head>
 <body>
 
+    <!-- Giriş Katmanı -->
     <div id="login-overlay" class="fixed inset-0 z-[2000] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl">
             <h2 class="text-3xl font-black mb-6 text-center text-slate-900">Admin Girişi</h2>
@@ -76,15 +77,13 @@
             <!-- Ayarlar Sekmesi -->
             <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border space-y-8">
                 <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
-                <div class="p-6 bg-amber-50 border border-amber-100 rounded-2xl text-amber-800 text-sm">
-                    <i class="fa-solid fa-circle-info mr-2"></i>
-                    Bu ortamda Gemini API anahtarı sistem tarafından otomatik olarak yönetilmektedir. Manuel anahtar girmenize gerek yoktur.
-                </div>
-                <div class="space-y-4 opacity-50 pointer-events-none">
-                    <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key (Otomatik)</label>
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
                     <div class="flex gap-2">
-                        <input type="password" value="SYSTEM_MANAGED" readonly class="flex-grow p-4 rounded-2xl border bg-slate-50 outline-none">
+                        <input type="password" id="gemini-key" placeholder="API Key girin..." class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
                     </div>
+                    <p class="text-[10px] text-slate-400">Bu anahtar, AI ile içerik üretmek için Supabase üzerinde güvenli bir şekilde saklanır.</p>
                 </div>
             </div>
         </main>
@@ -100,7 +99,6 @@
             <p class="text-slate-500">Hangi matematiksel konuda bir blog yazısı üretmek istersin?</p>
             <input type="text" id="ai-topic" placeholder="Örn: 8. Sınıf Üslü Sayılar Pratik Bilgiler" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
             
-            <!-- Durum ve Hata Mesajları -->
             <div id="ai-status-container" class="hidden py-4 rounded-2xl text-center font-bold">
                 <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600">
                     <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
@@ -133,6 +131,7 @@
                 if(admin) {
                     user = session.user;
                     showAdmin();
+                    loadSettings();
                 } else {
                     await sc.auth.signOut();
                     document.getElementById('login-overlay').classList.remove('hidden');
@@ -140,6 +139,19 @@
             } else {
                 document.getElementById('login-overlay').classList.remove('hidden');
             }
+        }
+
+        async function loadSettings() {
+            const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+            if(data) document.getElementById('gemini-key').value = data.value;
+        }
+
+        async function saveApiKey() {
+            const val = document.getElementById('gemini-key').value.trim();
+            if(!val) return alert("Lütfen bir anahtar girin.");
+            const { error } = await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val, updated_at: new Date() });
+            if(!error) alert("API Key başarıyla kaydedildi!");
+            else alert("Kaydedilemedi: " + error.message);
         }
 
         function showAdmin() {
@@ -155,13 +167,20 @@
             document.getElementById('tab-'+t).classList.remove('hidden');
         }
 
-        // Gemini AI Mantığı
         async function generateContent() {
             const topic = document.getElementById('ai-topic').value.trim();
             if(!topic) return alert("Lütfen bir konu girin.");
 
-            // Kural gereği apiKey boş bırakılır, çevre tarafından doldurulur
-            const apiKey = ""; 
+            // Ayarlardan API anahtarını çek
+            const { data: keyData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
+            const apiKey = keyData?.value;
+
+            if(!apiKey) {
+                alert("Lütfen önce Ayarlar sekmesinden Gemini API Key kaydedin!");
+                showTab('settings');
+                closeAIModal();
+                return;
+            }
 
             const btn = document.getElementById('ai-gen-btn');
             const statusContainer = document.getElementById('ai-status-container');
@@ -194,8 +213,12 @@
                             })
                         });
 
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error("API Anahtarı geçersiz veya yetkisiz (401/403). Lütfen anahtarı kontrol edin.");
+                        }
+
                         if (response.status === 404) {
-                            throw new Error("API uç noktası bulunamadı (404). Lütfen sistem ayarlarını kontrol edin.");
+                            throw new Error("Model bulunamadı (404). Lütfen model ismini kontrol edin.");
                         }
 
                         if (!response.ok) {
@@ -211,11 +234,10 @@
 
                     } catch (e) {
                         attempts++;
-                        // Yapısal hatalarda (404 gibi) tekrar denemeyi kes
-                        if (e.message.includes("404") || attempts >= 5) {
+                        // Kritik hatalarda (Auth/404) tekrar denemeyi kes
+                        if (e.message.includes("401") || e.message.includes("403") || e.message.includes("404") || attempts >= 5) {
                             throw e;
                         }
-                        // Exponential Backoff
                         await new Promise(r => setTimeout(r, delays[attempts-1]));
                     }
                 }
@@ -224,16 +246,15 @@
                 document.getElementById('p-title').value = blog.title;
                 document.getElementById('p-content').value = blog.content;
                 
-                // Başarılıysa temizle ve kapat
                 statusContainer.classList.add('hidden');
                 closeAIModal();
-                alert("Yazı hazır! İçeriği kontrol edip yayınlayabilirsiniz.");
+                alert("Yazı başarıyla oluşturuldu!");
 
             } catch (err) {
                 loading.classList.add('hidden');
                 errorDiv.classList.remove('hidden');
                 errorText.innerText = err.message;
-                console.error("AI Generation Error:", err);
+                console.error("AI Error:", err);
             } finally {
                 btn.disabled = false;
             }
@@ -246,7 +267,7 @@
         };
         window.closeAIModal = () => document.getElementById('ai-modal').classList.add('hidden');
 
-        // Form İşlemleri
+        // Formlar
         document.getElementById('post-form').onsubmit = async (e) => {
             e.preventDefault();
             const { error } = await sc.from('posts').insert([{ 
@@ -265,7 +286,7 @@
                 file_type: document.getElementById('f-type').value 
             }]);
             if(error) alert("Hata: " + error.message); 
-            else { alert("Dosya kaynağı başarıyla eklendi!"); e.target.reset(); }
+            else { alert("Dosya başarıyla eklendi!"); e.target.reset(); }
         }
 
         document.getElementById('admin-login-form').onsubmit = async (e) => {
