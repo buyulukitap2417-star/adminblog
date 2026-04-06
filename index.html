@@ -7,109 +7,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
         .loader { border-top-color: #10b981; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Giriş Katmanı -->
     <div id="login-overlay" class="fixed inset-0 z-[2000] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl">
             <h2 class="text-3xl font-black mb-6 text-center text-slate-900">Admin Girişi</h2>
             <form id="admin-login-form" class="space-y-4">
-                <input type="email" id="a-email" placeholder="E-posta" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                <input type="password" id="a-password" placeholder="Şifre" required class="w-full p-4 rounded-xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition">Giriş Yap</button>
+                <input type="email" id="a-email" placeholder="E-posta" required class="w-full p-4 rounded-xl border outline-none">
+                <input type="password" id="a-password" placeholder="Şifre" required class="w-full p-4 rounded-xl border outline-none">
+                <button type="submit" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold">Giriş Yap</button>
             </form>
         </div>
     </div>
 
     <div id="admin-content" class="hidden">
         <nav class="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-[100]">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm shadow-emerald-200">M</div>
-                <h1 class="text-xl font-black text-emerald-600 tracking-tighter uppercase">MATOTA Admin</h1>
-            </div>
+            <h1 class="text-xl font-black text-emerald-600 uppercase">MATOTA Admin</h1>
             <div class="flex gap-4">
-                <button onclick="showTab('publish')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2 transition hover:text-emerald-600">Yayınla</button>
-                <button onclick="showTab('settings')" class="tab-btn font-bold text-sm text-slate-600 border-b-2 border-transparent px-2 transition hover:text-emerald-600">Ayarlar</button>
-                <button onclick="logout()" class="text-red-500 text-sm font-bold hover:text-red-700 transition">Çıkış</button>
+                <button onclick="showTab('publish')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">Yayınla</button>
+                <button onclick="showTab('manage')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">İçerik Yönetimi</button>
+                <button onclick="showTab('settings')" class="tab-btn font-bold text-sm text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100">Ayarlar</button>
+                <button onclick="logout()" class="text-red-500 text-sm font-bold ml-4">Çıkış</button>
             </div>
         </nav>
 
         <main class="max-w-6xl mx-auto p-8">
+            <!-- Yayınlama Sekmesi -->
             <div id="tab-publish" class="space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-2xl font-bold text-slate-800">Blog Yazısı</h2>
-                            <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100 transition hover:bg-emerald-100">
-                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI ile İçerik Üret
-                            </button>
-                        </div>
-                        <form id="post-form" class="space-y-4">
-                            <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
-                            <textarea id="p-content" rows="12" placeholder="İçeriği buraya yazın..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition"></textarea>
-                            <button type="submit" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100">Yayınla</button>
-                        </form>
+                <div class="bg-white p-10 rounded-3xl shadow-sm border space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 id="form-title" class="text-2xl font-bold">Yeni Blog Yazısı</h2>
+                        <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI İle Hazırla</button>
                     </div>
+                    <form id="post-form" class="space-y-4">
+                        <input type="hidden" id="edit-id">
+                        <input type="text" id="p-title" placeholder="Yazı Başlığı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+                        <textarea id="p-content" rows="15" placeholder="İçerik..." required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                        <div class="flex gap-4">
+                            <button type="submit" id="submit-btn" class="flex-grow bg-emerald-600 text-white p-4 rounded-2xl font-bold">Yayınla</button>
+                            <button type="button" id="cancel-edit" class="hidden bg-slate-100 px-8 rounded-2xl font-bold" onclick="resetForm()">Vazgeç</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
-                        <h2 class="text-2xl font-bold text-slate-800">Kaynak Ekle</h2>
-                        <form id="file-form" class="space-y-4">
-                            <input type="text" id="f-name" placeholder="Dosya Adı" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                            <input type="url" id="f-url" placeholder="İndirme Linki" required class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                            <select id="f-type" class="w-full p-4 border rounded-2xl bg-white font-bold outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                                <option value="pdf">📄 PDF Belgesi</option>
-                                <option value="doc">📝 Word / Excel</option>
-                                <option value="image">🖼️ Görsel / Materyal</option>
-                            </select>
-                            <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold hover:bg-black transition">Sisteme Ekle</button>
-                        </form>
+            <!-- İçerik Yönetimi Sekmesi -->
+            <div id="tab-manage" class="hidden space-y-8">
+                <div class="bg-white p-10 rounded-3xl shadow-sm border">
+                    <h2 class="text-2xl font-bold mb-8">Yayınlanan İçerikler</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-slate-400 text-sm uppercase tracking-widest">
+                                    <th class="pb-4">Başlık</th>
+                                    <th class="pb-4">Tarih</th>
+                                    <th class="pb-4">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manage-list" class="divide-y"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-settings" class="hidden max-w-xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-8">
-                <h2 class="text-3xl font-black text-slate-900">Sistem Ayarları</h2>
-                <div class="space-y-4">
-                    <label class="block text-sm font-bold text-slate-500 uppercase tracking-widest">Gemini API Key</label>
-                    <div class="flex gap-2">
-                        <input type="password" id="gemini-key" placeholder="API Key'inizi buraya yapıştırın" class="flex-grow p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                        <button onclick="saveApiKey()" class="bg-emerald-600 text-white px-6 rounded-2xl font-bold hover:bg-emerald-700 transition">Kaydet</button>
-                    </div>
-                </div>
+            <!-- Ayarlar -->
+            <div id="tab-settings" class="hidden max-w-md mx-auto bg-white p-10 rounded-3xl border space-y-6">
+                <h2 class="text-2xl font-bold">Ayarlar</h2>
+                <input type="password" id="gemini-key" placeholder="Gemini API Key" class="w-full p-4 border rounded-xl outline-none">
+                <button onclick="saveApiKey()" class="w-full bg-slate-900 text-white p-4 rounded-xl font-bold">Kaydet</button>
             </div>
         </main>
     </div>
 
+    <!-- AI Modal -->
     <div id="ai-modal" class="fixed inset-0 z-[3000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6 hidden">
-        <div class="max-w-lg w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black text-slate-900">Doğal AI Yazar</h2>
-                <button type="button" onclick="closeAIModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <p class="text-slate-500 text-sm font-medium">Hangi konuda bir yazı hazırlamamı istersin? Gerçek bir öğretmen samimiyetiyle yazacağım.</p>
-            <input type="text" id="ai-topic" placeholder="Örn: Rasyonel Sayıları Sevdirecek Bir Yazı" class="w-full p-4 rounded-2xl border outline-none focus:ring-2 focus:ring-emerald-500 font-bold transition">
-            
-            <div id="ai-status-container" class="hidden py-2 text-center">
-                <div id="ai-loading" class="flex items-center justify-center gap-3 text-emerald-600 font-bold">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
-                    Kalemi kağıdı hazırlıyorum...
-                </div>
-                <div id="ai-error" class="hidden text-red-500 bg-red-50 p-4 rounded-2xl text-xs font-medium border border-red-100">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-                    <span id="ai-error-text">Hata oluştu!</span>
-                </div>
-            </div>
-
+        <div class="max-w-lg w-full bg-white p-10 rounded-3xl shadow-2xl space-y-6">
+            <h2 class="text-3xl font-black">AI Yazar</h2>
+            <input type="text" id="ai-topic" placeholder="Konu ne olsun?" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+            <div id="ai-status" class="hidden text-emerald-600 font-bold text-center py-4"><div class="loader mx-auto mb-2 border-4 rounded-full h-8 w-8"></div>Yazıyorum...</div>
             <div class="flex gap-4">
-                <button type="button" onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl font-bold bg-slate-100 hover:bg-slate-200 transition">Vazgeç</button>
-                <button type="button" id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition">Yazıyı Hazırla</button>
+                <button onclick="closeAIModal()" class="flex-1 p-4 rounded-2xl bg-slate-100 font-bold">Vazgeç</button>
+                <button id="ai-gen-btn" onclick="generateContent()" class="flex-1 p-4 rounded-2xl bg-emerald-600 text-white font-bold">Üret</button>
             </div>
         </div>
     </div>
@@ -119,182 +102,116 @@
         const SB_KEY = 'sb_publishable_JixS3C4jQ2Znrgcr3-IZPg_1MfpvdXW';
         const sc = window.supabase.createClient(SB_URL, SB_KEY);
 
-        let user = null;
-
         async function init() {
             const { data: { session } } = await sc.auth.getSession();
             if(session) {
                 const { data: admin } = await sc.from('admins').select('uid').eq('uid', session.user.id).single();
-                if(admin) {
-                    user = session.user;
-                    showAdmin();
-                    loadSettings();
-                } else {
-                    await sc.auth.signOut();
-                    showLogin();
-                }
-            } else {
-                showLogin();
-            }
+                if(admin) { showAdmin(); loadSettings(); fetchManageList(); }
+                else { await sc.auth.signOut(); showLogin(); }
+            } else showLogin();
         }
 
-        async function loadSettings() {
-            try {
-                const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
-                if(data && data.value) document.getElementById('gemini-key').value = data.value;
-            } catch (e) {
-                console.error("Ayarlar yüklenemedi:", e);
-            }
+        function showAdmin() { document.getElementById('login-overlay').classList.add('hidden'); document.getElementById('admin-content').classList.remove('hidden'); showTab('publish'); }
+        function showLogin() { document.getElementById('login-overlay').classList.remove('hidden'); }
+        function showTab(t) { ['publish','manage','settings'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); if(t === 'manage') fetchManageList(); }
+
+        async function loadSettings() { const { data } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single(); if(data) document.getElementById('gemini-key').value = data.value; }
+        async function saveApiKey() { const val = document.getElementById('gemini-key').value; await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val }); alert("Kaydedildi."); }
+
+        async function fetchManageList() {
+            const { data } = await sc.from('posts').select('*').order('created_at', { ascending: false });
+            document.getElementById('manage-list').innerHTML = data.map(p => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-6 font-bold text-slate-700">${p.title}</td>
+                    <td class="py-6 text-sm text-slate-400">${new Date(p.created_at).toLocaleDateString('tr-TR')}</td>
+                    <td class="py-6 space-x-2">
+                        <button onclick="editPost('${p.id}')" class="text-emerald-600 hover:bg-emerald-50 px-3 py-1 rounded-lg">Düzenle</button>
+                        <button onclick="deletePost('${p.id}')" class="text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg">Sil</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        async function saveApiKey() {
-            const val = document.getElementById('gemini-key').value.trim();
-            if(!val) return alert("API anahtarı boş olamaz.");
-            const { error } = await sc.from('app_settings').upsert({ key: 'gemini_api_key', value: val, updated_at: new Date() });
-            if(!error) alert("API Key başarıyla kaydedildi!");
-            else alert("Hata: " + error.message);
-        }
-
-        function showAdmin() {
-            document.getElementById('login-overlay').classList.add('hidden');
-            document.getElementById('admin-content').classList.remove('hidden');
+        async function editPost(id) {
+            const { data } = await sc.from('posts').select('*').eq('id', id).single();
+            document.getElementById('edit-id').value = data.id;
+            document.getElementById('p-title').value = data.title;
+            document.getElementById('p-content').value = data.content;
+            document.getElementById('form-title').innerText = "Yazıyı Güncelle";
+            document.getElementById('submit-btn').innerText = "Güncelle";
+            document.getElementById('cancel-edit').classList.remove('hidden');
             showTab('publish');
         }
 
-        function showLogin() {
-            document.getElementById('login-overlay').classList.remove('hidden');
-            document.getElementById('admin-content').classList.add('hidden');
+        async function deletePost(id) {
+            if(!confirm("Bu yazıyı silmek istediğine emin misin?")) return;
+            await sc.from('posts').delete().eq('id', id);
+            fetchManageList();
         }
 
-        function showTab(t) {
-            ['publish','settings'].forEach(id => {
-                document.getElementById('tab-'+id).classList.add('hidden');
-            });
-            document.getElementById('tab-'+t).classList.remove('hidden');
+        function resetForm() {
+            document.getElementById('edit-id').value = "";
+            document.getElementById('post-form').reset();
+            document.getElementById('form-title').innerText = "Yeni Blog Yazısı";
+            document.getElementById('submit-btn').innerText = "Yayınla";
+            document.getElementById('cancel-edit').classList.add('hidden');
         }
-
-        async function generateContent() {
-            const topic = document.getElementById('ai-topic').value.trim();
-            if(!topic) return alert("Lütfen bir konu belirtin.");
-
-            const { data: keyData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
-            const apiKey = keyData?.value;
-
-            if(!apiKey) {
-                alert("Önce Ayarlar sekmesinden Gemini API Key girmeli ve kaydetmelisiniz!");
-                showTab('settings');
-                closeAIModal();
-                return;
-            }
-
-            const modelName = "gemini-3.1-flash-lite-preview";
-            const btn = document.getElementById('ai-gen-btn');
-            const statusContainer = document.getElementById('ai-status-container');
-            const loading = document.getElementById('ai-loading');
-            const errorDiv = document.getElementById('ai-error');
-            const errorText = document.getElementById('ai-error-text');
-
-            btn.disabled = true;
-            statusContainer.classList.remove('hidden');
-            loading.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-
-            // --- YENİ PROMPT STRATEJİSİ ---
-            const systemPrompt = `Sen samimi, hayat dolu ve öğrencilerini çok seven bir ortaokul matematik öğretmenisin. 
-            Yazılarını bir robot gibi değil, sanki karşında öğrencilerin varmış gibi samimi bir dille yazıyorsun.
-            
-            KURALLAR:
-            1. Asla yapay zeka olduğunu belli etme.
-            2. "Merhaba ben bir yapay zekayım" gibi cümleler kurma.
-            3. Robotik listelerden (1. Madde, 2. Madde) kaçın, daha akıcı paragraflar kullan.
-            4. Her cümlenin sonuna emoji koyma. Sadece duygu katmak için arada bir kullan.
-            5. Markdown (**, #, ##) gibi sembolleri KESİNLİKLE kullanma. Temiz metin yaz.
-            6. Başlık ilgi çekici olsun.
-            7. Çıktıyı şu JSON formatında ver: {"title": "Başlık Buraya", "content": "Metin Buraya"}`;
-
-            const userQuery = `Öğretmenim, bugün şu konuda bir yazı yazar mısınız: ${topic}`;
-
-            let attempts = 0;
-            const maxAttempts = 3;
-
-            try {
-                while (attempts < maxAttempts) {
-                    try {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: userQuery }] }],
-                                systemInstruction: { parts: [{ text: systemPrompt }] },
-                                generationConfig: { responseMimeType: "application/json" }
-                            })
-                        });
-
-                        if (!response.ok) throw new Error("Bağlantı Hatası");
-
-                        const data = await response.json();
-                        const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                        
-                        if (resultText) {
-                            const blog = JSON.parse(resultText);
-                            document.getElementById('p-title').value = blog.title;
-                            document.getElementById('p-content').value = blog.content;
-                            statusContainer.classList.add('hidden');
-                            closeAIModal();
-                            return;
-                        }
-                    } catch (e) {
-                        attempts++;
-                        await new Promise(r => setTimeout(r, 2000));
-                    }
-                }
-                throw new Error("Yanıt alınamadı.");
-            } catch (err) {
-                loading.classList.add('hidden');
-                errorDiv.classList.remove('hidden');
-                errorText.innerText = err.message;
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        window.openAIModal = () => {
-            document.getElementById('ai-topic').value = "";
-            document.getElementById('ai-status-container').classList.add('hidden');
-            document.getElementById('ai-modal').classList.remove('hidden');
-        };
-        window.closeAIModal = () => document.getElementById('ai-modal').classList.add('hidden');
 
         document.getElementById('post-form').onsubmit = async (e) => {
             e.preventDefault();
-            const { error } = await sc.from('posts').insert([{ 
-                title: document.getElementById('p-title').value, 
-                content: document.getElementById('p-content').value 
-            }]);
-            if(error) alert("Hata: " + error.message); 
-            else { alert("Yazı başarıyla yayınlandı!"); e.target.reset(); }
+            const id = document.getElementById('edit-id').value;
+            const title = document.getElementById('p-title').value;
+            const content = document.getElementById('p-content').value;
+
+            if(id) {
+                await sc.from('posts').update({ title, content }).eq('id', id);
+                alert("Güncellendi!");
+            } else {
+                await sc.from('posts').insert([{ title, content }]);
+                alert("Yayınlandı!");
+                // Burada tüm abonelere mail gönderimi için bir tetikleyici (Edge Function) çağrılabilir.
+            }
+            resetForm();
+            showTab('manage');
         }
 
-        document.getElementById('file-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await sc.from('files').insert([{ 
-                name: document.getElementById('f-name').value, 
-                url: document.getElementById('f-url').value, 
-                file_type: document.getElementById('f-type').value 
-            }]);
-            if(error) alert("Hata: " + error.message); 
-            else { alert("Dosya başarıyla eklendi!"); e.target.reset(); }
+        async function generateContent() {
+            const topic = document.getElementById('ai-topic').value;
+            const apiKey = document.getElementById('gemini-key').value;
+            if(!topic || !apiKey) return alert("Konu ve Key eksik.");
+            
+            document.getElementById('ai-status').classList.remove('hidden');
+            document.getElementById('ai-gen-btn').classList.add('hidden');
+
+            const systemPrompt = "Sen samimi, hayat dolu bir ortaokul matematik öğretmenisin. Asla yapay zeka olduğunu belli etme. Markdown (#, **, ##) sembollerini KESİNLİKLE KULLANMA. Daha akıcı, gerçekçi ve samimi paragraflar kur. Çıktıyı JSON olarak ver: {'title': '...', 'content': '...'}";
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Konu: ${topic}` }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+                const data = await response.json();
+                const blog = JSON.parse(data.candidates[0].content.parts[0].text);
+                document.getElementById('p-title').value = blog.title;
+                document.getElementById('p-content').value = blog.content;
+                closeAIModal();
+            } catch (err) { alert("Hata!"); }
+            finally { document.getElementById('ai-status').classList.add('hidden'); document.getElementById('ai-gen-btn').classList.remove('hidden'); }
         }
+
+        window.openAIModal = () => document.getElementById('ai-modal').classList.remove('hidden');
+        window.closeAIModal = () => document.getElementById('ai-modal').classList.add('hidden');
 
         document.getElementById('admin-login-form').onsubmit = async (e) => {
             e.preventDefault();
-            const { error } = await sc.auth.signInWithPassword({ 
-                email: document.getElementById('a-email').value, 
-                password: document.getElementById('a-password').value 
-            });
-            if(error) alert("Giriş başarısız."); else location.reload();
+            await sc.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-password').value });
+            location.reload();
         }
-
         async function logout() { await sc.auth.signOut(); location.reload(); }
         init();
     </script>
