@@ -32,12 +32,12 @@
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner"><i class="fa-solid fa-user-shield"></i></div>
                 <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Yönetici Girişi</h2>
-                <p class="text-slate-400 font-medium mt-2 text-sm">Devam etmek için oturum açın.</p>
+                <p class="text-slate-400 font-medium mt-2 text-sm">Oturum açmanız veya yetkinizi doğrulamanız gerekiyor.</p>
             </div>
             <form id="admin-login-form" class="space-y-4">
-                <input type="email" id="a-email" placeholder="E-posta" required class="w-full p-4 border border-slate-100 bg-slate-50">
-                <input type="password" id="a-password" placeholder="Şifre" required class="w-full p-4 border border-slate-100 bg-slate-50">
-                <button type="submit" id="login-submit-btn" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100 mt-2 uppercase tracking-widest">Giriş Yap</button>
+                <input type="email" id="a-email" placeholder="admin@matota.online" required class="w-full p-4 border border-slate-100 bg-slate-50">
+                <input type="password" id="a-password" placeholder="••••••••" required class="w-full p-4 border border-slate-100 bg-slate-50">
+                <button type="submit" id="login-submit-btn" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100 mt-2 uppercase tracking-widest">Sisteme Bağlan</button>
             </form>
             <div class="mt-8 text-center border-t pt-6">
                 <button onclick="safeNavigate('index.html')" class="text-emerald-600 font-bold hover:underline text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Blog Sayfasına Dön</button>
@@ -47,50 +47,95 @@
 
     <!-- Admin Paneli Ana Yapısı -->
     <div id="admin-layout" class="hidden flex w-full h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
         <aside class="w-72 bg-white border-r flex flex-col flex-shrink-0 z-50 shadow-sm">
             <div class="p-8 flex items-center gap-3">
                 <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg rotate-3"><i class="fa-solid fa-square-root-variable"></i></div>
                 <span class="text-xl font-black tracking-tighter text-slate-800 uppercase">Matota<span class="text-emerald-500 font-light">|</span>Adm</span>
             </div>
+            
             <nav class="flex-grow px-4 space-y-2 mt-4 overflow-y-auto">
-                <button onclick="switchTab('posts')" id="nav-posts" class="sidebar-item active w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-left"><i class="fa-solid fa-newspaper w-5"></i> Yazılar</button>
-                <button onclick="switchTab('files')" id="nav-files" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-slate-500 text-left"><i class="fa-solid fa-folder-open w-5"></i> Dosyalar</button>
-                <button onclick="switchTab('webhooks')" id="nav-webhooks" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-slate-500 text-left"><i class="fa-solid fa-bolt w-5"></i> Ayarlar</button>
+                <button onclick="switchTab('posts')" id="nav-posts" class="sidebar-item active w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-left">
+                    <i class="fa-solid fa-newspaper w-5"></i> İçerik Stratejisi
+                </button>
+                <button onclick="switchTab('files')" id="nav-files" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-slate-500 text-left">
+                    <i class="fa-solid fa-folder-open w-5"></i> Kaynak Merkezi
+                </button>
+                <button onclick="switchTab('webhooks')" id="nav-webhooks" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition text-slate-500 text-left">
+                    <i class="fa-solid fa-bolt w-5"></i> Webhook & Ayar
+                </button>
             </nav>
-            <div class="p-8 border-t bg-slate-50/30">
-                <button onclick="logout()" class="w-full p-4 bg-red-50 text-red-500 rounded-2xl font-black text-xs hover:bg-red-500 hover:text-white transition uppercase tracking-widest">ÇIKIŞ YAP</button>
+            
+            <div class="p-8 border-t border-slate-50 bg-slate-50/30">
+                <button onclick="logout()" class="w-full p-4 bg-red-50 text-red-500 rounded-2xl font-black text-xs hover:bg-red-500 hover:text-white transition uppercase tracking-widest">
+                    <i class="fa-solid fa-power-off mr-2"></i> ÇIKIŞ YAP
+                </button>
             </div>
         </aside>
 
+        <!-- Ana İçerik Alanı -->
         <main class="flex-grow p-12 max-w-6xl overflow-y-auto bg-[#f8fafc]">
-            <!-- Yazılar Sekmesi -->
+            
+            <!-- TAB: Yazı Yönetimi -->
             <div id="tab-posts" class="tab-view active space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="flex justify-between items-end">
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Blog Yönetimi</h1>
-                    <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-6 py-3 rounded-2xl font-black uppercase tracking-tighter border border-emerald-200 hover:bg-emerald-600 hover:text-white transition shadow-sm"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> AI MÜKEMMEL YAZICI</button>
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Blog Yönetimi</h1>
+                        <p class="text-slate-400 font-medium mt-1">İçeriklerinizi düzenleyin ve AI ile efsanevi yazılar oluşturun.</p>
+                    </div>
+                    <button onclick="openAIModal()" class="bg-emerald-50 text-emerald-600 px-6 py-3 rounded-2xl font-black uppercase tracking-tighter border border-emerald-200 hover:bg-emerald-600 hover:text-white transition shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI MÜKEMMEL YAZICI
+                    </button>
                 </div>
+
+                <!-- Yazı Formu -->
                 <div class="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm space-y-6">
-                    <h3 id="post-form-title" class="text-xl font-bold">Yeni Yazı Hazırla</h3>
+                    <h3 id="post-form-title" class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-feather-pointed text-emerald-500"></i> Yeni Yazı Hazırla
+                    </h3>
                     <form id="post-form" class="space-y-5">
                         <input type="hidden" id="edit-id">
-                        <input type="text" id="p-title" placeholder="Başlık..." required class="w-full p-4 border border-slate-100 bg-slate-50 rounded-2xl font-bold text-lg">
-                        <textarea id="p-content" rows="14" placeholder="İçerik..." required class="w-full p-6 border border-slate-100 bg-slate-50 rounded-2xl resize-none leading-relaxed"></textarea>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-widest">BAŞLIK</label>
+                                <input type="text" id="p-title" placeholder="İlgi çekici bir başlık girin..." required class="w-full p-4 border border-slate-100 bg-slate-50 rounded-2xl font-bold text-lg focus:bg-white transition shadow-inner">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-widest">YAZI TÜRÜ</label>
+                                <select id="p-type" class="w-full p-4 border border-slate-100 bg-slate-50 rounded-2xl font-bold focus:bg-white transition shadow-inner">
+                                    <option value="blog">Normal Blog Yazısı</option>
+                                    <option value="privacy">Gizlilik Politikası</option>
+                                    <option value="legal">Aydınlatma Metni / Kurumsal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-widest">İÇERİK (Markdown)</label>
+                            <textarea id="p-content" rows="14" placeholder="Matematik serüveninizi burada anlatın..." required class="w-full p-6 border border-slate-100 bg-slate-50 rounded-2xl resize-none leading-relaxed focus:bg-white transition shadow-inner"></textarea>
+                        </div>
+
                         <div class="flex gap-4 pt-2">
-                            <button type="submit" id="submit-btn" class="flex-grow bg-emerald-600 text-white p-5 rounded-2xl font-black">YAYINLA VE DUYUR</button>
-                            <button type="button" id="btn-cancel-edit" class="hidden px-10 bg-slate-100 text-slate-500 rounded-2xl font-bold" onclick="resetPostForm()">VAZGEÇ</button>
+                            <button type="submit" id="submit-btn" class="flex-grow bg-emerald-600 text-white p-5 rounded-2xl font-black text-lg shadow-xl shadow-emerald-100 hover:scale-[1.01] transition uppercase tracking-widest">YAYINLA VE DUYUR</button>
+                            <button type="button" id="btn-cancel-edit" class="hidden px-10 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200 transition" onclick="resetPostForm()">VAZGEÇ</button>
                         </div>
                     </form>
                 </div>
+
+                <!-- Yazı Listesi -->
                 <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
                     <div class="p-8 border-b bg-slate-50/50 flex justify-between items-center">
                         <h4 class="font-black text-[10px] uppercase tracking-widest text-slate-400">AKTİF PAYLAŞIMLAR</h4>
                         <span id="post-stat-badge" class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">0 Yazı</span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
+                        <table class="w-full text-left border-collapse">
                             <thead class="bg-slate-50/30 border-b border-slate-50">
                                 <tr class="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                                    <th class="p-8 text-left">YAZI BAŞLIĞI</th>
+                                    <th class="p-8">YAZI BAŞLIĞI & TARİH</th>
+                                    <th class="p-8 text-center">TÜR</th>
                                     <th class="p-8 text-center">ETKİLEŞİM</th>
                                     <th class="p-8 text-right">İŞLEMLER</th>
                                 </tr>
@@ -101,65 +146,74 @@
                 </div>
             </div>
 
-            <!-- Dosyalar Sekmesi -->
+            <!-- TAB: Dosya & Kategori -->
             <div id="tab-files" class="tab-view space-y-10 animate-in fade-in duration-500">
-                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Kaynaklar</h1>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Kaynak Kütüphanesi</h1>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                        <h3 class="font-bold text-xl text-slate-800">Kategori Oluştur</h3>
+                        <h3 class="font-bold text-xl flex items-center gap-2 text-slate-800"><i class="fa-solid fa-folder-plus text-emerald-500"></i> Kategori Oluştur</h3>
                         <form id="cat-form" class="space-y-4">
-                            <input type="text" id="cat-name" placeholder="Kategori Adı..." required class="w-full p-4 border border-slate-100 bg-slate-50">
+                            <input type="text" id="cat-name" placeholder="Örn: 8. Sınıf LGS Denemeleri" required class="w-full p-4 border border-slate-100 bg-slate-50">
                             <select id="cat-parent" class="w-full p-4 border border-slate-100 bg-slate-50 font-bold cursor-pointer">
-                                <option value="">Ana Kategori</option>
+                                <option value="">Ana Kategori Olarak Ekle</option>
                             </select>
-                            <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black text-xs shadow-lg uppercase tracking-widest">KAYDET</button>
+                            <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black text-xs shadow-lg uppercase tracking-widest hover:bg-black transition">KATEGORİYİ KAYDET</button>
                         </form>
                     </div>
                     <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                        <h3 class="font-bold text-xl text-slate-800">Dosya Yükle</h3>
+                        <h3 class="font-bold text-xl flex items-center gap-2 text-slate-800"><i class="fa-solid fa-cloud-arrow-up text-emerald-500"></i> Dosya Yükle</h3>
                         <form id="file-upload-form" class="space-y-4">
-                            <input type="file" id="file-input" required class="w-full p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50 cursor-pointer">
+                            <input type="file" id="file-input" required class="w-full p-4 border-2 border-dashed border-slate-100 bg-slate-50 cursor-pointer">
                             <select id="file-cat-select" required class="w-full p-4 border border-slate-100 bg-slate-50 font-bold cursor-pointer">
                                 <option value="" disabled selected>Kategori Seçin</option>
                             </select>
-                            <button type="submit" id="btn-upload" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-black shadow-xl">YÜKLE</button>
+                            <button type="submit" id="btn-upload" class="w-full bg-emerald-600 text-white p-4 rounded-2xl font-black shadow-xl flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-upload"></i> BUCKET'A YÜKLE
+                            </button>
                         </form>
                     </div>
                 </div>
                 <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="p-8 border-b bg-slate-50/50 font-black text-[10px] uppercase text-slate-400 tracking-widest text-center">YÜKLÜ DOSYALAR</div>
                     <div id="files-list-display" class="divide-y divide-slate-50"></div>
                 </div>
             </div>
 
-            <!-- Ayarlar Sekmesi -->
+            <!-- TAB: Ayarlar -->
             <div id="tab-webhooks" class="tab-view space-y-10 animate-in fade-in duration-500">
                 <h1 class="text-4xl font-black text-slate-900 tracking-tight">Sistem Ayarları</h1>
                 <div class="bg-white p-12 rounded-[3rem] border border-slate-100 max-w-3xl space-y-10 shadow-sm mx-auto">
                     <div class="space-y-3">
                         <label class="font-black text-[10px] text-slate-400 ml-2 uppercase tracking-[0.2em]">Gemini API Key</label>
-                        <input type="password" id="gemini-key" placeholder="AI Key..." class="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl shadow-inner">
+                        <input type="password" id="gemini-key" placeholder="AI Key girin..." class="w-full p-5 bg-slate-50 border border-slate-100 shadow-inner">
                     </div>
                     <div class="space-y-3">
                         <label class="font-black text-[10px] text-slate-400 ml-2 uppercase tracking-[0.2em]">Webhook URL</label>
-                        <input type="url" id="webhook-url" placeholder="https://hook.zapier.com/..." class="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl shadow-inner">
+                        <input type="url" id="webhook-url" placeholder="https://hook.make.com/..." class="w-full p-5 bg-slate-50 border border-slate-100 shadow-inner">
                     </div>
-                    <button onclick="saveAllSettings()" class="w-full bg-slate-900 text-white p-6 rounded-[2rem] font-black uppercase tracking-widest">Yapılandırmayı Kaydet</button>
+                    <button onclick="saveAllSettings()" class="w-full bg-slate-900 text-white p-6 rounded-[2rem] font-black text-lg shadow-2xl hover:scale-[1.01] transition uppercase tracking-widest">
+                        Yapılandırmayı Kaydet
+                    </button>
                 </div>
             </div>
+
         </main>
     </div>
 
     <!-- Modallar -->
     <div id="ai-modal" class="hidden fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
-        <div class="max-w-xl w-full bg-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 animate-in zoom-in duration-300">
-            <h2 class="text-4xl font-black text-center">AI Yazıcı</h2>
-            <input type="text" id="ai-topic" placeholder="Yazı konusu..." class="w-full p-6 border border-slate-100 bg-slate-50 rounded-2xl font-bold text-lg">
+        <div class="max-w-xl w-full bg-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 animate-in zoom-in duration-300 border border-white/20">
+            <div class="text-center">
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight">Mükemmel Yazıcı</h2>
+                <p class="text-slate-400 font-medium mt-2">Gemini 3.1 Flash Lite ile samimi ve vizyoner bir yazı kurgulayın.</p>
+            </div>
+            <input type="text" id="ai-topic" placeholder="Konu: Örn. Üslü Sayıların Hayatımızdaki Yeri" class="w-full p-6 border border-slate-100 bg-slate-50 rounded-2xl font-bold text-lg focus:bg-white shadow-inner">
             <div id="ai-loading" class="hidden flex flex-col items-center justify-center gap-4 text-emerald-600 font-bold py-4">
-                <div class="loader"></div> <span>Efsane içerik hazırlanıyor...</span>
+                <div class="loader"></div> <span>Ders notları ve efsane bir anlatım hazırlanıyor...</span>
             </div>
             <div class="flex gap-4">
-                <button onclick="closeAIModal()" class="flex-1 p-5 bg-slate-100 rounded-[2rem] font-bold text-slate-500">VAZGEÇ</button>
-                <button id="ai-gen-btn" onclick="generateExcellentPost()" class="flex-1 p-5 bg-emerald-600 text-white rounded-[2rem] font-black shadow-lg">ÜRET</button>
+                <button onclick="closeAIModal()" class="flex-1 p-5 bg-slate-100 rounded-[2rem] font-bold text-slate-500 hover:bg-slate-200 transition">VAZGEÇ</button>
+                <button id="ai-gen-btn" onclick="generateExcellentPost()" class="flex-1 p-5 bg-emerald-600 text-white rounded-[2rem] font-black shadow-lg hover:scale-105 transition uppercase tracking-widest">ÜRET</button>
             </div>
         </div>
     </div>
@@ -167,11 +221,11 @@
     <div id="comment-modal" class="hidden fixed inset-0 z-[10000] bg-black/50 backdrop-blur-md flex items-center justify-center p-6">
         <div class="max-w-3xl w-full bg-white p-10 rounded-[3rem] shadow-2xl space-y-6 border border-white/10 animate-in fade-in zoom-in duration-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-6">
-                <h3 id="comment-modal-title" class="text-2xl font-black">Yazı Yorumları</h3>
-                <button onclick="closeCommentModal()" class="text-slate-400 text-2xl hover:text-red-500 transition">&times;</button>
+                <h3 id="comment-modal-title" class="text-2xl font-black text-slate-800 tracking-tight">Yazı Yorumları</h3>
+                <button onclick="closeCommentModal()" class="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-full text-slate-400 hover:text-red-500 transition text-2xl">&times;</button>
             </div>
             <div id="comment-modal-list" class="max-h-[50vh] overflow-y-auto space-y-4 pr-3 py-2"></div>
-            <button onclick="closeCommentModal()" class="w-full p-5 bg-slate-100 rounded-2xl font-black text-slate-500 uppercase tracking-widest text-xs">KAPAT</button>
+            <button onclick="closeCommentModal()" class="w-full p-5 bg-slate-100 rounded-2xl font-black text-slate-500 hover:bg-slate-200 transition uppercase tracking-widest text-xs">KAPAT</button>
         </div>
     </div>
 
@@ -183,6 +237,7 @@
         let allPosts = [];
         let isInitialLoad = true;
 
+        // Oturum Durumunu Dinle
         sc.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
                 checkAdmin(session.user);
@@ -191,12 +246,80 @@
             }
         });
 
+        // INITIALIZATION
         async function init() {
             try {
                 const { data: { session } } = await sc.auth.getSession();
                 if (session) await checkAdmin(session.user);
                 else showLoginOverlay();
-            } catch (err) { console.error("Critical Init Error", err); showLoginOverlay(); }
+                
+                // Hata Giderme: Listener'ları DOM hazır olduğunda bağla
+                bindEventListeners();
+            } catch (err) { console.error("Kritik Başlatma Hatası:", err); showLoginOverlay(); }
+        }
+
+        function bindEventListeners() {
+            const postForm = document.getElementById('post-form');
+            if(postForm) {
+                postForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('edit-id').value;
+                    const title = document.getElementById('p-title').value.trim();
+                    const content = document.getElementById('p-content').value.trim();
+                    const post_type = document.getElementById('p-type').value;
+
+                    try {
+                        let res;
+                        if(id) res = await sc.from('posts').update({ title, content, post_type }).eq('id', id);
+                        else res = await sc.from('posts').insert([{ title, content, post_type, likes_count: 0, comments_count: 0 }]);
+                        
+                        if(!res.error) {
+                            alert("İşlem Başarılı!"); 
+                            resetPostForm(); 
+                            loadPosts();
+                            triggerWebhook(id ? 'POST_UPDATED' : 'POST_PUBLISHED', { title, post_type });
+                        } else throw res.error;
+                    } catch (err) { alert("Hata: " + err.message); }
+                };
+            }
+
+            const catForm = document.getElementById('cat-form');
+            if(catForm) {
+                catForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    await sc.from('file_categories').insert([{ name: document.getElementById('cat-name').value.trim(), parent_id: document.getElementById('cat-parent').value || null }]);
+                    e.target.reset(); loadCategories(); alert("Kategori eklendi.");
+                };
+            }
+
+            const fileForm = document.getElementById('file-upload-form');
+            if(fileForm) {
+                fileForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const fInput = document.getElementById('file-input');
+                    const file = fInput.files[0];
+                    const catId = document.getElementById('file-cat-select').value;
+                    if(!file || !catId) return alert("Dosya veya kategori eksik!");
+                    const btn = document.getElementById('btn-upload'); btn.disabled = true; btn.innerText = "YÜKLENİYOR...";
+                    try {
+                        const fPath = `files/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                        const { error: sErr } = await sc.storage.from('files').upload(fPath, file);
+                        if(sErr) throw sErr;
+                        await sc.from('files').insert([{ name: file.name, storage_path: fPath, category_id: catId, file_type: file.name.split('.').pop().toUpperCase(), size: (file.size/1024/1024).toFixed(2) + " MB" }]);
+                        alert("Yüklendi!"); fInput.value = ""; loadFiles();
+                    } catch (err) { alert("Hata: " + err.message); }
+                    finally { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-upload"></i> BUCKET'A YÜKLE`; }
+                };
+            }
+
+            const loginForm = document.getElementById('admin-login-form');
+            if(loginForm) {
+                loginForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const { error } = await sc.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-password').value });
+                    if(error) alert("Giriş Hatası!");
+                };
+            }
         }
 
         async function checkAdmin(user) {
@@ -225,13 +348,16 @@
         }
 
         const safeNavigate = (path) => {
-            if(!path) path = 'index.html';
-            window.location.href = path;
+            const target = path ? path.replace('./', '') : 'index.html';
+            window.location.href = target;
         };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active', 'text-white'));
+            document.querySelectorAll('.sidebar-item').forEach(b => {
+                b.classList.remove('active', 'text-white');
+                b.classList.add('text-slate-500');
+            });
             const target = document.getElementById('tab-' + tabId);
             const btn = document.getElementById('nav-' + tabId);
             if(target) target.classList.add('active');
@@ -252,45 +378,34 @@
         // --- POSTS ---
         async function loadPosts() {
             const { data, error } = await sc.from('posts').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("Posts fetch error:", error); return; }
+            if (error) return;
             allPosts = data || [];
-            document.getElementById('post-stat-badge').innerText = `${allPosts.length} YAZI AKTİF`;
+            document.getElementById('post-stat-badge').innerText = `${allPosts.length} Yazı`;
             
             document.getElementById('posts-table').innerHTML = allPosts.map(p => {
                 const safeTitle = (p.title || "Başlıksız").replace(/'/g, "\\'");
+                const typeLabels = { 'blog': 'Blog', 'privacy': 'Gizlilik', 'legal': 'Kurumsal' };
                 return `
                 <tr class="hover:bg-slate-50/50 transition group border-b border-slate-50">
                     <td class="p-8">
-                        <h4 class="font-black text-slate-800 line-clamp-1">${p.title || "Başlıksız"}</h4>
+                        <h4 class="font-black text-slate-800 line-clamp-1 group-hover:text-emerald-600 transition">${p.title || "Başlıksız"}</h4>
                         <p class="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">${new Date(p.created_at).toLocaleDateString('tr-TR')}</p>
                     </td>
                     <td class="p-8 text-center">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[9px] font-black uppercase tracking-tighter">${typeLabels[p.post_type] || 'Blog'}</span>
+                    </td>
+                    <td class="p-8 text-center">
                         <button onclick="openPostComments('${p.id}', '${safeTitle}')" class="px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
-                            <i class="fa-solid fa-comments mr-2"></i> ${Math.max(0, p.comments_count || 0)} Yorum
+                            <i class="fa-solid fa-comments mr-1"></i> ${Math.max(0, p.comments_count || 0)}
                         </button>
                     </td>
                     <td class="p-8 text-right space-x-2">
-                        <button onclick="editPost('${p.id}')" class="text-emerald-600 p-2"><i class="fa-solid fa-pen-nib"></i></button>
-                        <button onclick="deletePost('${p.id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="editPost('${p.id}')" class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl hover:scale-110 transition inline-flex items-center justify-center shadow-sm"><i class="fa-solid fa-pen-nib"></i></button>
+                        <button onclick="deletePost('${p.id}')" class="w-10 h-10 bg-red-50 text-red-500 rounded-xl hover:scale-110 transition inline-flex items-center justify-center shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
                     </td>
                 </tr>
-            `}).join('') || `<tr><td colspan="3" class="p-20 text-center text-slate-400 font-bold italic text-sm">İçerik bulunamadı.</td></tr>`;
+            `}).join('') || `<tr><td colspan="4" class="p-20 text-center text-slate-400 font-bold italic">İçerik bulunamadı.</td></tr>`;
         }
-
-        document.getElementById('post-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-id').value;
-            const title = document.getElementById('p-title').value.trim();
-            const content = document.getElementById('p-content').value.trim();
-            try {
-                if(id) await sc.from('posts').update({ title, content }).eq('id', id);
-                else {
-                    await sc.from('posts').insert([{ title, content, likes_count: 0, comments_count: 0 }]);
-                    await triggerWebhook('NEW_POST', { title, content });
-                }
-                alert("İşlem Başarılı!"); resetPostForm(); loadPosts();
-            } catch (err) { alert("Hata: " + err.message); }
-        };
 
         async function deletePost(id) {
             if(!confirm("Bu yazı silinecek, emin misiniz?")) return;
@@ -304,8 +419,9 @@
             document.getElementById('edit-id').value = p.id;
             document.getElementById('p-title').value = p.title;
             document.getElementById('p-content').value = p.content;
+            document.getElementById('p-type').value = p.post_type || 'blog';
             document.getElementById('post-form-title').innerText = "Yazıyı Düzenle";
-            document.getElementById('submit-btn').innerText = "GÜNCELLE";
+            document.getElementById('submit-btn').innerText = "GÜNCELLEMELERİ KAYDET";
             document.getElementById('btn-cancel-edit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -314,6 +430,7 @@
             document.getElementById('edit-id').value = "";
             document.getElementById('post-form').reset();
             document.getElementById('post-form-title').innerText = "Yeni Yazı Yayınla";
+            document.getElementById('submit-btn').innerText = "YAYINLA VE DUYUR";
             document.getElementById('btn-cancel-edit').classList.add('hidden');
         }
 
@@ -328,7 +445,7 @@
                         <span class="font-black text-xs text-emerald-800 uppercase tracking-tighter">${c.user_name}</span>
                         <p class="text-sm text-slate-600 mt-1 leading-relaxed">${c.text}</p>
                     </div>
-                    <button onclick="removeC('${c.id}', '${c.post_id}')" class="text-red-300 hover:text-red-500 transition px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="removeC('${c.id}', '${c.post_id}')" class="text-red-300 hover:text-red-500 transition px-2 py-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('') || "<p class='p-12 text-center text-slate-400 italic text-sm'>Yorum yapılmamış.</p>";
         }
@@ -340,8 +457,8 @@
                 const p = allPosts.find(post => post.id === pId);
                 const newCount = Math.max(0, (p?.comments_count || 0) - 1);
                 await sc.from('posts').update({ comments_count: newCount }).eq('id', pId);
-                alert("Yorum silindi."); closeCommentModal(); loadPosts();
-            } else alert(error.message);
+                alert("Silindi."); closeCommentModal(); loadPosts();
+            }
         }
 
         // --- FILES ---
@@ -353,51 +470,21 @@
             selects[1].innerHTML = '<option value="" disabled selected>Kategori Seçin</option>' + html;
         }
 
-        document.getElementById('cat-form').onsubmit = async (e) => {
-            e.preventDefault();
-            await sc.from('file_categories').insert([{ name: document.getElementById('cat-name').value.trim(), parent_id: document.getElementById('cat-parent').value || null }]);
-            e.target.reset(); loadCategories(); alert("Kategori eklendi.");
-        };
-
-        document.getElementById('file-upload-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const fInput = document.getElementById('file-input');
-            const file = fInput.files[0];
-            const catId = document.getElementById('file-cat-select').value;
-            if(!file || !catId) return alert("Seçim eksik!");
-            const btn = document.getElementById('btn-upload'); btn.disabled = true; btn.innerText = "YÜKLENİYOR...";
-            try {
-                const fPath = `files/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-                const { error: sErr } = await sc.storage.from('files').upload(fPath, file);
-                if(sErr) throw sErr;
-                await sc.from('files').insert([{ name: file.name, storage_path: fPath, category_id: catId, file_type: file.name.split('.').pop().toUpperCase(), size: (file.size/1024/1024).toFixed(2) + " MB" }]);
-                alert("Yüklendi!"); fInput.value = ""; loadFiles();
-            } catch (err) { alert("Hata: " + err.message); }
-            finally { btn.disabled = false; btn.innerText = "YÜKLE"; }
-        };
-
         async function loadFiles() {
             const { data } = await sc.from('files').select('*').order('created_at', { ascending: false });
             document.getElementById('files-list-display').innerHTML = data?.map(f => `
-                <div class="p-8 flex justify-between items-center bg-white border-b border-slate-50 group hover:bg-slate-50 transition-all">
+                <div class="p-8 flex justify-between items-center bg-white border-b border-slate-50">
                     <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 bg-teal-50 text-teal-600 rounded-[1.25rem] flex items-center justify-center text-2xl rotate-2 shadow-sm"><i class="fa-solid fa-file-invoice"></i></div>
-                        <div>
-                            <h5 class="font-black text-slate-800 text-sm">${f.name}</h5>
-                            <div class="flex gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1.5">
-                                <span>${f.file_type} Belgesi</span>
-                                <span>•</span>
-                                <span>${f.size}</span>
-                            </div>
-                        </div>
+                        <div class="w-14 h-14 bg-teal-50 text-teal-600 rounded-[1.25rem] flex items-center justify-center text-2xl shadow-sm"><i class="fa-solid fa-file-invoice"></i></div>
+                        <div><h5 class="font-black text-slate-800 text-sm">${f.name}</h5><span class="text-[10px] text-slate-400 font-bold uppercase">${f.file_type} • ${f.size}</span></div>
                     </div>
                     <button onclick="delF('${f.id}','${f.storage_path}')" class="text-red-300 hover:text-red-500 transition px-4 py-2"><i class="fa-solid fa-trash-can text-sm"></i></button>
                 </div>
-            `).join('') || "<div class='p-20 text-center text-slate-400 italic text-sm'>Arşiv boş.</div>";
+            `).join('') || "<div class='p-20 text-center text-slate-400 italic text-sm'>Henüz kaynak yok.</div>";
         }
 
         async function delF(id, path) {
-            if(!confirm("Kalıcı olarak silinecek?")) return;
+            if(!confirm("Dosya silinsin mi?")) return;
             await sc.storage.from('files').remove([path]);
             await sc.from('files').delete().eq('id', id);
             loadFiles();
@@ -407,7 +494,7 @@
         async function generateExcellentPost() {
             const topic = document.getElementById('ai-topic').value.trim();
             const { data: kData } = await sc.from('app_settings').select('value').eq('key', 'gemini_api_key').single();
-            if(!topic || !kData?.value) return alert("Konu veya API Key yok!");
+            if(!topic || !kData?.value) return alert("Eksik bilgi!");
             const btn = document.getElementById('ai-gen-btn'); const loader = document.getElementById('ai-loading');
             btn.classList.add('hidden'); loader.classList.remove('hidden');
             const sys = `Sen vizyoner bir matematik öğretmenisin. YAPAY ZEKA OLDUĞU ANLAŞILMAYAN, UZUN (en az 600 kelime), DERİNLEMESİNE ve GÖRSEL OLARAK ZENGİN (Markdown) bir blog yazısı üret. Başlıklar (#), vurgular (**) ve alıntılar (>) kullan. Robotik listeler yapma. JSON dön: {"title": "...", "content": "..."}`;
@@ -444,12 +531,7 @@
         function closeCommentModal() { document.getElementById('comment-modal').classList.add('hidden'); }
         async function logout() { await sc.auth.signOut(); }
 
-        document.getElementById('admin-login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await sc.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-password').value });
-            if(error) alert("Giriş Hatası!");
-        }
-        init();
+        window.onload = init;
     </script>
 </body>
 </html>
